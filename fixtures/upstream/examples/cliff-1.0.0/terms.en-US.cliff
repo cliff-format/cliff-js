@@ -1,0 +1,25 @@
+CLIFF 1.0
+namespace: studio
+clan: terms
+source-language: zh-CN
+target-language: en-US
+variant: glossary
+title: "Studio glossary for IronForge RPG"
+standard: "Canonical term translations; dialect-specific files may override."
+
+[combat]
+type: noun
+
+<iron-sword>
+source: "铁剑"
+target: "Iron Sword"
+type: noun
+status: final
+context: "Generic blade; use 'blade' in poetic register."
+
+<block-of-grass>
+source: "草方块"
+target: "The Block of Grass"
+type: fixed-phrase
+status: final
+context: "Minecraft-style building block; the article must be preserved."

@@ -1,0 +1,26 @@
+# Every line below may end with one optional "," or ";" (CLIFF 1.1 section 5.6).
+# The terminator means nothing, is never emitted by a canonical serializer, and
+# a second one on the same line is a syntax error.
+CLIFF 1.1
+# <!-- non-canonical: shows accepted terminator input; a serializer drops it -->
+namespace: demo;
+clan: settings,
+source-language: en-US
+target-language: zh-CN,
+title: "Trailing terminators are accepted"; 
+
+[Video],
+context: "Video settings screen.";
+type: label,
+emotion: [objective, neutral,];
+max-width: 12;
+
+<Resolution>,
+source: "Resolution",
+target: "分辨率",
+status: final;
+
+<Punctuation>,
+source: "Commas, semicolons; and colons: are payload inside a quoted string."
+context: "The trailing value is 'a,b;' — the terminator is recognized only after the closing quote."
+status: initial,

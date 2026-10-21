@@ -1,0 +1,60 @@
+{
+  "name": "@cliff-format/core",
+  "version": "0.1.0",
+  "description": "Browser-first CLIFF 1.0/1.1 parser, serializer and validator",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "browser": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cliff-format/cliff-js.git",
+    "directory": "packages/core"
+  },
+  "keywords": [
+    "cliff",
+    "i18n",
+    "l10n",
+    "localization",
+    "parser",
+    "validator"
+  ],
+  "homepage": "https://github.com/cliff-format/cliff-js#readme",
+  "bugs": {
+    "url": "https://github.com/cliff-format/cliff-js/issues"
+  }
+}

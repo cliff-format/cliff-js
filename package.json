@@ -1,0 +1,38 @@
+{
+  "name": "cliff-js",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@11.22.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "biome check .",
+    "check:versions": "node scripts/check-versions.mjs",
+    "check:vcs": "node scripts/check-vcs.mjs",
+    "check:boundaries": "node scripts/check-package-boundaries.mjs",
+    "fixtures:check": "node scripts/sync-fixtures.mjs --check",
+    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm check:package && pnpm check:versions && pnpm check:boundaries && pnpm check:browser && pnpm fixtures:check && pnpm check:vcs",
+    "test:browser": "playwright test",
+    "check:package": "node scripts/check-package.mjs",
+    "check:browser": "node scripts/check-browser-bundle.mjs"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@biomejs/biome": "^2.0.0",
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "^3.2.0",
+    "esbuild": "^0.28.2",
+    "fast-check": "^4.0.0",
+    "publint": "^0.3.25",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  }
+}

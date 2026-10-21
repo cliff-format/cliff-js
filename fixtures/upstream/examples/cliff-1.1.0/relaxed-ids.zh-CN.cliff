@@ -1,0 +1,46 @@
+CLIFF 1.1
+namespace: IronForge-RPG
+clan: Act3_Strings
+source-language: en-US
+target-language: zh-CN
+title: "Identifier shapes that CLIFF 1.1 accepts"
+info: "Every identifier in this file would be rejected by CLIFF 1.0 and is valid 1.1. The shapes are deliberately mixed here to show the character set; a real project picks one shape per file (see style/README.md)."
+standard: "Identifiers are match keys: never rename one because the text changed."
+
+[Video.Advanced]
+context: "Advanced video settings screen."
+type: label
+emotion: [objective]
+max-width: 14
+
+<fullscreen>
+source: "Fullscreen"
+target: "全屏"
+status: final
+
+<SaveSlot_2>
+source: "Save slot 2"
+target: "存档位 2"
+status: reviewed
+
+<200>
+source: "200%"
+target: "200%"
+type: numeral
+status: final
+
+<_hidden>
+source: "Hidden"
+target: "隐藏"
+type: label
+status: translated
+
+[video-output]
+context: "Output settings; this group path deliberately uses a different shape than the sections above."
+type: label
+
+<HDMI1_Input>
+source: "HDMI 1 input"
+target: "HDMI 1 输入"
+status: translated
+reference: ["src/ui/video_output.cpp:88", "docs/act3-script.md#hdmi"]

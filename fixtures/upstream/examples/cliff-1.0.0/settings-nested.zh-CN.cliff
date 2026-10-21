@@ -1,0 +1,32 @@
+CLIFF 1.0
+namespace: demo
+clan: settings-nested
+source-language: en-US
+target-language: zh-CN
+title: "Nested demo settings"
+
+[video]
+context: "Video settings."
+type: label
+max-width: 12
+
+<resolution>
+source: "Resolution"
+target: "分辨率"
+status: final
+
+[video.advanced]
+context: "Advanced video settings."
+max-width: 20
+
+<hdr>
+source: "HDR"
+target: "HDR"
+type: label
+status: final
+
+<anti-alias>
+source: "Anti-aliasing"
+target: "抗锯齿"
+type: noun
+status: reviewed

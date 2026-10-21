@@ -1,0 +1,30 @@
+name: VCS
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  vcs:
+    name: English commit and branch policy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Check version control artifacts
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            node scripts/check-vcs.mjs --base "origin/${{ github.base_ref }}" --head HEAD --pr-title "$PR_TITLE" --branch "$HEAD_REF"
+          else
+            node scripts/check-vcs.mjs
+          fi

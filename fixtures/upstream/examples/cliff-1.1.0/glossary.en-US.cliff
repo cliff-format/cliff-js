@@ -1,0 +1,25 @@
+CLIFF 1.1
+namespace: studio
+clan: terms
+source-language: zh-CN
+target-language: en-US
+variant: glossary
+title: "Studio terminology"
+standard: "Canonical translations; dialect-specific files may override."
+
+[items]
+type: noun-phrase
+
+<BlockOfGrass>
+source: "草方块"
+target: "The Block of Grass"
+type: fixed-phrase
+status: final
+context: "Minecraft-style building block; the article must be preserved."
+
+<iron_sword>
+source: "铁剑"
+target: "iron sword"
+type: noun-phrase
+status: final
+context: "Common weapon; lowercase in running text, capitalized only in UI labels."

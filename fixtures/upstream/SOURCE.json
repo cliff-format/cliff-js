@@ -1,0 +1,19 @@
+{
+  "cliff": {
+    "repository": "https://github.com/cliff-format/cliff",
+    "commit": "150b305d9945151529915397b1006790b726a651",
+    "paths": [
+      "spec/examples",
+      "references"
+    ],
+    "license": "MIT"
+  },
+  "cliff-test": {
+    "repository": "https://github.com/cliff-format/cliff-test",
+    "commit": "b67f318b0375497ebdee47900cc9639b9a38fd19",
+    "paths": [
+      "tests/fixtures"
+    ],
+    "license": "MIT"
+  }
+}

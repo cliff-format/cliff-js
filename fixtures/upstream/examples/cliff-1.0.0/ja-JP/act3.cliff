@@ -1,0 +1,15 @@
+CLIFF 1.0
+namespace: demo
+clan: act3
+source-language: en-US
+target-language: ja-JP
+title: "Act 3 dialog (folder layout example)"
+info: "Example: the ja-JP folder and act3 file name agree with the required header fields."
+
+[act3]
+type: dialogue
+
+<greeting>
+source: "Hello, traveler."
+target: "こんにちは、旅人さん。"
+status: translated
