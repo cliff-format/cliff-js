@@ -288,8 +288,10 @@ boundary checks, the browser bundle check and the fixture provenance check. The 
 runs in CI with `pnpm test:browser`.
 
 The repository follows the English-only [version control policy](docs/version-control.md).
-Documentation-only changes skip the heavy `CI` workflow; the lightweight `VCS` workflow still
-checks the commit message. A full run can be started manually from the Actions tab.
+Development integrates on `dev`; `main` is release-only. Feature and fix pull requests target
+`dev`, while release merges target `main`. Documentation-only changes skip the heavy `CI`
+workflow; the lightweight `VCS` workflow still checks the commit message. A full run can be
+started manually from the Actions tab.
 
 ## Links
 

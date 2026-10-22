@@ -41,13 +41,19 @@ Follow [docs/version-control.md](docs/version-control.md):
 
 - English Conventional Commits, optionally prefixed with `[AI]`.
 - One logical change per commit.
-- Short-lived English branch names.
-- Squash or rebase merge; no merge commits.
+- `main` is the release branch; `dev` is the integration branch.
+- Create work branches from `dev`: `feature/<slug>`, `fix/<slug>`, `docs/<slug>`, `test/<slug>`, `refactor/<slug>`, `ci/<slug>`, `build/<slug>`, `chore/<slug>`, `perf/<slug>` or `style/<slug>`.
+- Feature and fix pull requests target `dev`. Release pull requests target `main` and merge `dev` into `main`.
+- Merge commits are allowed. The `dev` to `main` release merge must be a merge commit; `main` is not linear.
 - All version control artifacts are English.
 
 ## Release
 
-Releases are prepared by a release pull request, tagged `vX.Y.Z` and published by the release workflow. See [docs/version-control.md](docs/version-control.md).
+Releases are prepared on `dev`, merged into `main` with a release merge commit, tagged `vX.Y.Z` on `main`, and published by the release workflow. The GitHub Release body comes from `.github/release-notes/vX.Y.Z.md`. See [docs/version-control.md](docs/version-control.md).
+
+The release workflow can also be started manually from the Actions tab. Its `dry_run` input defaults to `true`; a real run must be dispatched from the matching annotated tag. The workflow skips a package version that already exists on npm, so a GitHub Release for an already manually published version is safe.
+
+For the first release, publish manually, then configure the package's trusted publisher with `npm trust github`. See the package settings on npm for the exact repository, workflow and environment.
 
 ## Scope
 

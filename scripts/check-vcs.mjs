@@ -11,7 +11,8 @@ const typePattern = "feat|fix|docs|test|refactor|perf|style|chore|build|ci|rever
 const subjectPattern = new RegExp(
   `^(?:\\[AI\\] )?(?:${typePattern})(?:\\([a-z0-9-]+(?:\\/[a-z0-9-]+)?\\))?!?: [^\\n]{1,72}$`,
 );
-const branchPattern = new RegExp(`^(?:${typePattern})\\/[a-z0-9]+(?:-[a-z0-9]+)*$`);
+const branchPattern =
+  /^(?:feature|fix|docs|test|refactor|ci|build|chore|perf|style|prototype)\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const cjk = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u;
 const failures = [];
 
@@ -72,10 +73,15 @@ if (insideGit) {
       branch = "";
     }
   }
-  if (branch && branch !== "main" && !branchPattern.test(branch)) {
-    fail(`branch '${branch}' does not match '<type>/<english-slug>'`);
+  if (branch && branch !== "main" && branch !== "dev" && !branchPattern.test(branch)) {
+    fail(`branch '${branch}' does not match '<type>/<english-slug>' or 'dev'`);
   }
   checkEnglish("branch", branch ?? "");
+
+  const baseBranch = process.env.GITHUB_BASE_REF;
+  if (baseBranch && baseBranch !== "main" && baseBranch !== "dev") {
+    fail(`pull request base '${baseBranch}' must be 'dev' or 'main'`);
+  }
 }
 
 const title = arg("--pr-title") ?? process.env.PR_TITLE;
