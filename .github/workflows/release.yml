@@ -39,6 +39,8 @@ jobs:
           cache: pnpm
           registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
+      - name: Fetch the release branch
+        run: git fetch origin main
       - name: Verify release tag and versions
         run: node scripts/check-release.mjs
       - run: pnpm verify

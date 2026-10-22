@@ -37,6 +37,8 @@ First public release.
   files.
 - Added the English version control policy, commit and version checks, and CI workflows for
   Node 22/24/26 and Chromium/Firefox/WebKit.
+- Adopted a `main`/`dev` branch workflow: feature and fix work targets `dev`; releases merge
+  `dev` into `main` and are tagged on `main`.
 - Vendored the CLIFF specification examples and `cliff-test` conformance fixtures with source
   metadata.
 - Added package metadata checks with publint and Are the Types Wrong, plus an isolated tarball

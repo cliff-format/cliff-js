@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
 const root = JSON.parse(readFileSync("package.json", "utf8"));
@@ -30,8 +31,17 @@ if (event === "release") {
   }
 }
 
+const checkMain = event === "release" || (!dryRun && refType === "tag");
+if (checkMain) {
+  const ancestor = spawnSync("git", ["merge-base", "--is-ancestor", "HEAD", "origin/main"]);
+  if (ancestor.status !== 0) {
+    console.error("release tag is not on the main branch");
+    process.exit(1);
+  }
+}
+
 if (dryRun) {
   console.log("release metadata OK for dry-run (package version " + version + ")");
 } else {
-  console.log("release tag " + expectedTag + " matches package version");
+  console.log("release tag " + expectedTag + " matches package version and is on main");
 }
