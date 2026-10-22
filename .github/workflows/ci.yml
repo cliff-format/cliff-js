@@ -2,7 +2,28 @@ name: CI
 
 on:
   push:
+    paths-ignore:
+      - "*.md"
+      - "**/*.md"
+      - "docs/**"
+      - "LICENSE"
+      - ".editorconfig"
+      - ".gitattributes"
+      - ".gitignore"
   pull_request:
+    paths-ignore:
+      - "*.md"
+      - "**/*.md"
+      - "docs/**"
+      - "LICENSE"
+      - ".editorconfig"
+      - ".gitattributes"
+      - ".gitignore"
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read

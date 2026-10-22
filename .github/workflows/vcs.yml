@@ -3,6 +3,11 @@ name: VCS
 on:
   push:
   pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: vcs-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read

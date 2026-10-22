@@ -25,6 +25,8 @@ pnpm fixtures:check
 
 `pnpm verify` runs the project checks except the browser test suite. Browser tests use Playwright and are run in CI with `pnpm test:browser`.
 
+The heavy `CI` workflow is skipped when every changed file is documentation, a license, or repository metadata. The lightweight `VCS` workflow still runs because the commit message is a version control artifact. Use the manual `workflow_dispatch` trigger when a full CI run is needed for a documentation-only change.
+
 ## Tests and fixtures
 
 - Unit, conformance and JSON tests live under `packages/*/test`.
