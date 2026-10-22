@@ -73,12 +73,14 @@ Examples:
 
 1. Create `build/release-vX.Y.Z` from `main`.
 2. Set the root package version and every published package version to `X.Y.Z`.
-3. Update the English `CHANGELOG.md`.
+3. Update the English `CHANGELOG.md` and `.github/release-notes/vX.Y.Z.md`.
 4. Commit with `[AI] build(release): prepare vX.Y.Z`.
 5. Run `pnpm verify`, `pnpm check:versions` and `pnpm check:package`.
 6. Merge the pull request into `main`.
-7. Create the annotated tag `vX.Y.Z` and publish a GitHub Release.
-8. The release workflow verifies the tag and package versions, builds, and publishes both packages with npm provenance.
+7. Create the annotated tag `vX.Y.Z` and publish a GitHub Release whose body is the release-notes file.
+8. The release workflow verifies the tag and package versions, builds, skips versions already on npm, and publishes missing packages with npm provenance.
+9. The workflow also supports a manual dispatch. Its `dry_run` input defaults to `true`; a real manual run must be dispatched from the matching tag.
+10. For the first release, publish manually, then configure the package's GitHub Actions trusted publisher with `npm trust github`.
 
 The project does not use Changesets. Versions are prepared by the release pull request, matching the other CLIFF repositories.
 

@@ -3,6 +3,16 @@ name: Release
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run npm publish with --dry-run and skip registry writes"
+        type: boolean
+        default: true
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -13,6 +23,9 @@ jobs:
     name: Publish npm packages
     runs-on: ubuntu-latest
     environment: npm
+    timeout-minutes: 30
+    env:
+      DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,10 +39,8 @@ jobs:
           cache: pnpm
           registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
-      - name: Verify tag and package versions
+      - name: Verify release tag and versions
         run: node scripts/check-release.mjs
       - run: pnpm verify
-      - name: Publish
-        run: pnpm -r publish --access public --provenance --no-git-checks
-        env:
-          NPM_CONFIG_PROVENANCE: "true"
+      - name: Publish packages
+        run: node scripts/publish-packages.mjs

@@ -47,7 +47,11 @@ Follow [docs/version-control.md](docs/version-control.md):
 
 ## Release
 
-Releases are prepared by a release pull request, tagged `vX.Y.Z` and published by the release workflow. See [docs/version-control.md](docs/version-control.md).
+Releases are prepared by a release pull request, tagged `vX.Y.Z` and published by the release workflow. The GitHub Release body comes from `.github/release-notes/vX.Y.Z.md`. See [docs/version-control.md](docs/version-control.md).
+
+The release workflow can also be started manually from the Actions tab. Its `dry_run` input defaults to `true`; a real run must be dispatched from the matching annotated tag. The workflow skips a package version that already exists on npm, so a GitHub Release for an already manually published version is safe.
+
+For the first release, publish manually, then configure the package's trusted publisher with `npm trust github`. See the package settings on npm for the exact repository, workflow and environment.
 
 ## Scope
 
