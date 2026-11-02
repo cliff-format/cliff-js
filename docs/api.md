@@ -22,7 +22,7 @@ serialize(document: CliffDocument, options?: { version?: "1.0" | "1.1" }): strin
 
 ### Model
 
-`CliffDocument` contains `specVersion`, `header`, `groups`, an optional `path` and `corrections`. `CliffHeader`, `CliffGroup` and `CliffEntry` use camelCase property names; JSON interchange uses kebab-case field names.
+`CliffDocument` contains `specVersion`, `header`, `groups`, an optional `path` and `corrections`. `path` is non-serialized runtime metadata used for file-layout warnings; CLIFF has no `path` field. `CliffGroup.path` is the section/group path, not a field either. `CliffHeader`, `CliffGroup` and `CliffEntry` use camelCase property names; JSON interchange uses kebab-case field names.
 
 Each group and entry carries a 1-based `line`. Hand-built models use `line: 0`.
 
@@ -97,6 +97,92 @@ Flat/nested output is lossy and only carries keys and values. Import options req
 
 See the [JSON package README](../packages/json/README.md) for the complete options.
 
+## @cliff-format/i18n
+
+```ts
+createI18n(options: I18nOptions): I18n
+
+i18n.scope({ namespace, clan, group? }): { t, scope }
+i18n.add(resource, options?): AddResult
+i18n.addDocument(document, options?): AddResult
+i18n.files(options?): CliffFile[]
+i18n.toCliff(options?): string
+i18n.setLocale(locale) / changeLanguage(locale)
+i18n.subscribe(listener): () => void
+i18n.format(message, params?, options?) / formatToParts(...)
+i18n.validate() / diagnostics()
+```
+
+`namespace` and `clan` are required by `TranslationScope`. There is no default scope and no
+`i18n.t` property; use `i18n.scope()` or the React hook.
+
+The full entry uses `messageformat` for MF2 and `@messageformat/icu-messageformat-1` for MF1.
+`@cliff-format/i18n/lite` excludes those dependencies. `@cliff-format/i18n/react` exports
+`I18nProvider`, `useI18n` and `useTranslation`.
+
+### Key input
+
+```ts
+type KeyInput =
+  | string
+  | { namespace?: string; clan?: string; group?: string; id: string };
+```
+
+Strings accept `namespace:clan.group.id`, `namespace.clan.group.id`,
+`namespace/clan/group/id`, scoped short keys and unique ids. Ambiguity throws
+`CliffAmbiguousKeyError`; a full key outside the scope throws `CliffScopeMismatchError`.
+
+### Builder
+
+```ts
+t("key")                         // MessageBuilder<{ source: false; type: false }>
+t("key", params)                 // string
+t("key").render()                // lookup
+t("key").source("Text")          // authoring; render is never until type is supplied
+  .type(TYPE.label)              // A
+  .typeFromGroup()               // B: explicit group inheritance
+  .emotion(EMOTION.objective)
+  .render();
+```
+
+Drafts are created on `render()` / `commit()` and exported by `toCliff()`. `source`,
+effective `type` and `status` are enforced. `emotion` is optional by CLIFF and derives from
+`type`; `requireEmotion` can tighten the project rule.
+
+### Diagnostics
+
+`missing-key`, `ambiguous-key`, `type-mismatch`, `emotion-mismatch`, `source-mismatch`,
+`width-exceeded`, `icu-error`, `draft-created`, `fallback-used` and related codes are delivered
+through `onDiagnostic` and `diagnostics()`.
+
+## @cliff-format/translate
+
+```ts
+createDeepSeekTranslator(options): DeepSeekTranslator
+translator.complete(messages, options?): Promise<DeepSeekCompletion>
+translator.translate(cliffSource, options?): Promise<TranslationResult>
+translator.translateDocument(document, options?): Promise<TranslationResult>
+```
+
+Defaults: `baseUrl: "https://api.deepseek.com"`, `model: "deepseek-flash"`,
+`temperature: 1.3`, `thinking: "off"` (sent as `{"thinking":{"type":"disabled"}}`), `topP: 1`,
+`maxTokens: 8192`, `timeoutMs: 180000`, `maxRetries: 2`.
+
+The prompt contains CLIFF only. Responses are parsed with `parseTolerant`, validated, and merged by
+canonical id; only `target` and `status` are copied. `reviewed`/`final` entries are preserved
+unless `overwrite: "all"`. See the [translate package README](../packages/translate/README.md).
+
+## @cliff-format/vite
+
+```ts
+cliff(options?): Plugin
+```
+
+Transforms `.cliff` into a module whose default export is the raw CLIFF string, generates
+`virtual:cliff` resources and an ambient `CliffKey` union. Options: `dirs`, `include`,
+`exclude`, `virtualModule`, `dts`, `typegen`, `reloadOnChange`. See the
+[Vite package README](../packages/vite/README.md).
+
 ## Errors
 
 - `CliffError`
@@ -105,3 +191,5 @@ See the [JSON package README](../packages/json/README.md) for the complete optio
 - `UnsupportedSpecVersion` (`declared`, `supported`)
 - `CliffLimitError` (`limit`, `observed`)
 - `CliffModelError`
+- `CliffScopeError`, `CliffScopeMismatchError`, `CliffMissingKeyError`, `CliffAmbiguousKeyError`, `CliffDuplicateKeyError`, `CliffMissingMetadataError`, `CliffIcuError`
+- `DeepSeekConfigError`, `DeepSeekHttpError`, `TranslationParseError`, `TranslationValidationError`

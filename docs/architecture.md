@@ -6,8 +6,12 @@
 | --- | --- | --- |
 | `@cliff-format/core` | model, parser, serializer, validator, identifiers, width, layout | none |
 | `@cliff-format/json` | CLIFF-shaped, flat and nested JSON conversion | peer `@cliff-format/core` |
+| `@cliff-format/i18n` | CLIFF runtime catalog, key resolution, `t()` builder, ICU, diagnostics | peer `@cliff-format/core`; `messageformat`, `@messageformat/icu-messageformat-1`; optional peer React |
+| `@cliff-format/translate` | DeepSeek client, CLIFF prompt and tolerant response merge | peer `@cliff-format/core` |
+| `@cliff-format/vite` | `.cliff` module transform, `virtual:cliff`, type generation, HMR | peer `@cliff-format/core`, `vite` |
 
-Future packages — CLI, runtime i18n, AI integration, Vite integration and the other format converters — depend on core. Core never imports them.
+Core never imports another workspace package. The web packages depend on the core public API; they
+do not add a new localization file format.
 
 ## Data flow
 
@@ -23,12 +27,17 @@ string / Uint8Array
         v
  CliffDocument  ──────────────> serializer ──> canonical CLIFF
         |
-        v
- validator ──> ValidationIssue[]
+        +──> validator ──> ValidationIssue[]
         |
-        v
- @cliff-format/json ──> CLIFF-shaped / flat / nested JSON
+        +──> @cliff-format/json ──> CLIFF-shaped / flat / nested JSON
+        |
+        +──> @cliff-format/i18n catalog ──> key resolution ──> t() ──> ICU ──> string | parts
+        |
+        +──> @cliff-format/translate ──> DeepSeek ──> CLIFF ──> parse/validate/merge
 ```
+
+The Vite plugin embeds the raw CLIFF text in the module graph. It does not compile resources to
+JSON.
 
 ## Invariants
 
@@ -40,6 +49,10 @@ string / Uint8Array
 6. Extensions are preserved as raw CLIFF text and are never inherited.
 7. JSON importers never silently overwrite a key or identifier; renames and collisions are reported.
 8. The core entry point is browser-safe: no Node built-ins, no file I/O, no evaluation of document content.
+9. The i18n runtime is a view over CLIFF documents. It never converts a document to a JSON resource.
+10. `t()` scope requires namespace and clan. Authoring cannot `render()` before `source` and an effective `type` exist.
+11. Translation copies only `target` and `status`; structure and metadata come from the original CLIFF document.
+12. File paths are build/runtime metadata, not CLIFF fields. `CliffDocument.path` is never serialized.
 
 ## Error model
 
@@ -49,6 +62,8 @@ string / Uint8Array
 - `CliffModelError` — a malformed model or JSON object.
 - `UnsupportedSpecVersion` — a CLIFF version this build does not implement.
 - `CliffError` — base class.
+- `CliffScopeError`, `CliffScopeMismatchError`, `CliffMissingKeyError`, `CliffAmbiguousKeyError`, `CliffDuplicateKeyError`, `CliffMissingMetadataError`, `CliffIcuError` — runtime localization errors.
+- `DeepSeekConfigError`, `DeepSeekHttpError`, `TranslationParseError`, `TranslationValidationError` — translation errors.
 
 ## Versioning
 

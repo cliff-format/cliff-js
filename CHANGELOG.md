@@ -4,6 +4,29 @@ All notable changes to the CLIFF JavaScript packages are recorded here. Each ver
 features that changed behaviour, the packaging and documentation work around them, and the notes
 that matter to people building against the library.
 
+## Unreleased
+
+### New Features
+
+- Added `@cliff-format/i18n`, a CLIFF-native web runtime with a scoped `t()` builder, canonical-key
+  resolution, locale fallback, a compile-time source/type state machine, diagnostics and React
+  bindings.
+- Added full ICU support: MessageFormat 2 through `messageformat`, and MessageFormat 1 through
+  `@messageformat/icu-messageformat-1`, with `format()`, `formatToParts()`, markup parts and an
+  opt-out `@cliff-format/i18n/lite` entry.
+- Added `@cliff-format/translate`, a server/build-side DeepSeek client that sends and receives
+  CLIFF only. Defaults are `deepseek-flash`, temperature 1.3 and disabled thinking; responses are
+  parsed tolerantly and merged by canonical id.
+- Added `@cliff-format/vite`, which imports `.cliff` files as raw CLIFF modules, generates
+  `virtual:cliff` resources and an ambient `CliffKey` union, and refreshes both on HMR.
+- Added `docs/web-localization.md` and package READMEs for the new packages.
+
+### Other Changes
+
+- Added package-boundary, version, browser-bundle, publint and Are the Types Wrong checks for the
+  new packages.
+- Updated the root README, architecture, API, browser and conformance documentation.
+
 ## 0.1.0 — 2026-10-22
 
 First public release.

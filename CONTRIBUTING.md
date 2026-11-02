@@ -57,4 +57,6 @@ For the first release, publish manually, then configure the package's trusted pu
 
 ## Scope
 
-0.1.0 contains only the core parser, serializer, validator and JSON converters. Do not add CLI, runtime i18n, AI integration or additional format converters to this release.
+The repository contains the core parser/serializer/validator, JSON converters, the CLIFF web
+runtime, the DeepSeek translation client and the Vite plugin. CLI and additional format converters
+also depend on the core public API; add them as separate packages rather than extending core.
