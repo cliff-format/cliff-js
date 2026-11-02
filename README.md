@@ -14,7 +14,7 @@
   <a href="https://github.com/cliff-format/cliff/blob/main/spec/cliff-1.1.0.md"><img alt="CLIFF 1.0 | 1.1" src="https://img.shields.io/badge/CLIFF-1.0%20%7C%201.1-2ea043"></a>
   <img alt="Node.js 22+" src="https://img.shields.io/badge/node-%E2%89%A522-339933">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-2ea043"></a>
-  <img alt="Version 0.2.1" src="https://img.shields.io/badge/version-0.2.1-blue">
+  <img alt="Version 0.2.0" src="https://img.shields.io/badge/version-0.2.0-blue">
 </p>
 
 ---
