@@ -39,10 +39,10 @@ into CLIFF.
 
 ~~~ts
 import { resources, files } from "virtual:cliff";
-import type { CliffEntryId } from "virtual:cliff";
+import type { CliffCanonicalId } from "virtual:cliff";
 import { createI18n } from "@cliff-format/i18n";
 
-const i18n = createI18n<CliffEntryId>({
+const i18n = createI18n<CliffCanonicalId>({
   locale: "zh-CN",
   fallbackLocale: "en-US",
   resources,
@@ -59,7 +59,7 @@ declaration:
 
 ~~~ts
 declare module "virtual:cliff" {
-  export type CliffEntryId = "demo.settings.video.resolution";
+  export type CliffCanonicalId = "demo.settings.video.resolution";
   export interface CliffFileMeta { ... }
   export const resources: readonly string[];
   export const files: CliffFileMeta[];

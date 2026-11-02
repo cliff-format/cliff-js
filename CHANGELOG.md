@@ -18,7 +18,7 @@ that matter to people building against the library.
   CLIFF only. Defaults are `deepseek-flash`, temperature 1.3 and disabled thinking; responses are
   parsed tolerantly and merged by canonical entry ID.
 - Added `@cliff-format/vite`, which imports `.cliff` files as raw CLIFF modules, generates
-  `virtual:cliff` resources and an ambient `CliffEntryId` union, and refreshes both on HMR.
+  `virtual:cliff` resources and an ambient `CliffCanonicalId` union, and refreshes both on HMR.
 - Added status queries and enum-like vocabulary exports: `query()`, `untranslated()`,
   `byStatus()`, `statusCounts()`, `STATUS`, `VARIANT`, vocabulary guards and
   `canTransitionStatus()`. Writes now reconcile `initial`/`translated`/review invalidation
@@ -27,7 +27,7 @@ that matter to people building against the library.
 
 ### Other Changes
 
-- Renamed runtime key-facing types to match the CLIFF data model: `CliffKey` → `CliffEntryId`,
+- Renamed runtime key-facing types to match the CLIFF data model: `CliffKey` → `CliffCanonicalId`,
   `KeyInput` → `EntryIdInput`, `ResolvedKey` → `ResolvedEntryId`, and the missing/ambiguous/
   duplicate error classes to `*EntryError`. Collection methods are now `entryIds()`. The `missing`
   option value `"key"` is now `"entryId"`.

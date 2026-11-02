@@ -212,7 +212,7 @@ cliff(options?): Plugin
 ```
 
 Transforms `.cliff` into a module whose default export is the raw CLIFF string, generates
-`virtual:cliff` resources and an ambient `CliffEntryId` union. Options: `dirs`, `include`,
+`virtual:cliff` resources and an ambient `CliffCanonicalId` union. Options: `dirs`, `include`,
 `exclude`, `virtualModule`, `dts`, `typegen`, `reloadOnChange`. See the
 [Vite package README](../packages/vite/README.md).
 

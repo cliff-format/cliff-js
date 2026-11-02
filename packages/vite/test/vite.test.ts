@@ -90,7 +90,7 @@ describe("CLIFF Vite plugin", () => {
     const files = await scanCliffFiles(options);
     const dts = generateDts(files, "virtual:cliff");
     expect(dts).toContain('declare module "virtual:cliff"');
-    expect(dts).toContain('export type CliffEntryId = "demo.settings.video.resolution";');
+    expect(dts).toContain('export type CliffCanonicalId = "demo.settings.video.resolution";');
     expect(dts).toContain("export const resources: readonly string[];");
     expect(dts).toContain('declare module "*.cliff"');
     await writeDts(files, options);

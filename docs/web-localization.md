@@ -183,7 +183,7 @@ part of the client bundle.
 ## 10. Vite
 
 The Vite plugin transforms `.cliff` into a JavaScript module whose default export is the raw CLIFF
-string, and generates `virtual:cliff` resources plus an ambient `CliffEntryId` union. This gives
+string, and generates `virtual:cliff` resources plus an ambient `CliffCanonicalId` union. This gives
 editors autocomplete without changing the file format and keeps the runtime parsing CLIFF.
 
 ## 11. Pain points addressed
