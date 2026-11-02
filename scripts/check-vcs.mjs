@@ -48,11 +48,18 @@ if (insideGit) {
   const head = arg("--head") ?? process.env.VCS_HEAD ?? "HEAD";
   let log = "";
   try {
-    log = base
-      ? execFileSync("git", ["log", "--no-merges", "--format=%B%x00", `${base}..${head}`], {
-          encoding: "utf8",
-        })
-      : execFileSync("git", ["log", "-1", "--format=%B"], { encoding: "utf8" });
+    if (base) {
+      log = execFileSync("git", ["log", "--no-merges", "--format=%B%x00", `${base}..${head}`], {
+        encoding: "utf8",
+      });
+    } else {
+      // GitHub checks out a pull request at a synthetic merge commit. Its message is
+      // generated, not authored, so there is nothing to validate in that case.
+      const parentCount = git(["rev-list", "--parents", "-n", "1", head]).split(/\s+/).length - 1;
+      if (parentCount <= 1) {
+        log = execFileSync("git", ["log", "-1", "--format=%B"], { encoding: "utf8" });
+      }
+    }
   } catch (error) {
     fail(`cannot read git history: ${error.message}`);
   }
