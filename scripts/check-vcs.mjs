@@ -54,9 +54,13 @@ if (insideGit) {
       });
     } else {
       // GitHub checks out a pull request at a synthetic merge commit. Its message is
-      // generated, not authored, so there is nothing to validate in that case.
-      const parentCount = git(["rev-list", "--parents", "-n", "1", head]).split(/\s+/).length - 1;
-      if (parentCount <= 1) {
+      // generated, not authored, so there is nothing to validate in that case. Read
+      // the commit object rather than rev-list: a shallow checkout still has the
+      // parent headers even when it lacks the parent objects.
+      const parents = git(["cat-file", "-p", head])
+        .split("\n")
+        .filter((line) => line.startsWith("parent ")).length;
+      if (parents <= 1) {
         log = execFileSync("git", ["log", "-1", "--format=%B"], { encoding: "utf8" });
       }
     }
