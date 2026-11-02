@@ -186,6 +186,19 @@ function Home() {
 `useTranslation` returns a scope-bound `t` and the controller. It re-renders on locale changes via
 `useSyncExternalStore`. The core package does not depend on React.
 
+Use **one hook per clan** for a page that spans several groups; put the group path in the key:
+
+~~~tsx
+const { t } = useTranslation({ namespace: "demo", clan: "marketing" });
+t("home.title").render();
+t("features.context-title").render();
+t("format.line-1").render();
+~~~
+
+The `group` option is a convenience prefix for a component whose keys all belong to one group. Do
+not call `useTranslation` once per section in the same component: each call creates another scoped
+translator and another locale subscription.
+
 ## Diagnostics
 
 `onDiagnostic` and `i18n.diagnostics()` report `missing-key`, `ambiguous-key`,
