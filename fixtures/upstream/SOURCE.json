@@ -1,7 +1,7 @@
 {
   "cliff": {
     "repository": "https://github.com/cliff-format/cliff",
-    "commit": "150b305d9945151529915397b1006790b726a651",
+    "commit": "d82afc0115f055e1d41d604a07f3889d87fa448d",
     "paths": [
       "spec/examples",
       "references"
@@ -10,7 +10,7 @@
   },
   "cliff-test": {
     "repository": "https://github.com/cliff-format/cliff-test",
-    "commit": "b67f318b0375497ebdee47900cc9639b9a38fd19",
+    "commit": "b7f70642b77e23c4b710e8f4dc9383c843e55534",
     "paths": [
       "tests/fixtures"
     ],
