@@ -4,7 +4,7 @@ All notable changes to the CLIFF JavaScript packages are recorded here. Each ver
 features that changed behaviour, the packaging and documentation work around them, and the notes
 that matter to people building against the library.
 
-## Unreleased
+## 0.2.0 — 2026-11-02
 
 ### New Features
 
@@ -27,10 +27,11 @@ that matter to people building against the library.
 
 ### Other Changes
 
-- Renamed runtime key-facing types to match the CLIFF data model: `CliffKey` → `CliffCanonicalId`,
-  `KeyInput` → `EntryIdInput`, `ResolvedKey` → `ResolvedEntryId`, and the missing/ambiguous/
-  duplicate error classes to `*EntryError`. Collection methods are now `entryIds()`. The `missing`
-  option value `"key"` is now `"entryId"`.
+- Released the web packages together. `@cliff-format/core` and `@cliff-format/json` keep
+  their 0.1.0 behavior; all packages share the 0.2.0 version.
+- Renamed runtime key-facing APIs to entry IDs: the generated union is `CliffCanonicalId`, input is
+  `EntryIdInput`, resolution returns `ResolvedEntryId`, error classes use `*EntryError`, and
+  collection methods are `entryIds()`. The `missing` option value `"key"` is now `"entryId"`.
 - Added package-boundary, version, browser-bundle, publint and Are the Types Wrong checks for the
   new packages.
 - Updated the root README, architecture, API, browser and conformance documentation.

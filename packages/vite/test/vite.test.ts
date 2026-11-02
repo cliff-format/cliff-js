@@ -12,6 +12,7 @@ function callHook(hook: UnknownHook | undefined, thisArg: unknown, ...args: unkn
 }
 
 import {
+  CliffPluginError,
   cliff,
   generateDts,
   resolveCliffOptions,
@@ -125,5 +126,88 @@ describe("CLIFF Vite plugin", () => {
       join(root, "src", "locales", "zh-CN", "settings.cliff"),
     )) as { code: string };
     expect(transformed.code).toContain("const cliff = ");
+  });
+
+  it("handles config, server watching and hot updates", async () => {
+    const root = await fixture();
+    const plugin = cliff({ root, dirs: ["src/locales"] });
+    callHook(plugin.configResolved as UnknownHook, {}, { root } as never);
+
+    expect(callHook(plugin.resolveId as UnknownHook, {}, "other")).toBeNull();
+    expect(await callHook(plugin.load as UnknownHook, {}, "other")).toBeNull();
+    expect(callHook(plugin.transform as UnknownHook, {}, sample, "/src/app.css")).toBeNull();
+    expect(
+      callHook(
+        plugin.transform as UnknownHook,
+        {},
+        sample,
+        join(root, "src", "locales", "zh-CN", "settings.cliff") + "?raw",
+      ),
+    ).toBeNull();
+
+    const add = vi.fn();
+    callHook(plugin.configureServer as UnknownHook, {}, { watcher: { add } });
+    expect(add).toHaveBeenCalled();
+
+    const invalidateModule = vi.fn();
+    const send = vi.fn();
+    const server = {
+      moduleGraph: { getModuleById: () => ({ id: "virtual:cliff" }), invalidateModule },
+      ws: { send },
+    };
+    const result = await callHook(
+      plugin.handleHotUpdate as UnknownHook,
+      {},
+      {
+        file: join(root, "src", "locales", "zh-CN", "settings.cliff"),
+        server,
+      },
+    );
+    expect(result).toEqual([]);
+    expect(invalidateModule).toHaveBeenCalled();
+    expect(send).toHaveBeenCalledWith({ type: "full-reload" });
+    await callHook(
+      plugin.handleHotUpdate as UnknownHook,
+      {},
+      {
+        file: join(root, "src", "app.css"),
+        server,
+      },
+    );
+  });
+
+  it("loads before buildStart and reports parse failures", async () => {
+    const root = await fixture();
+    const plugin = cliff({ root, dirs: ["src/locales"], dts: false });
+    const loaded = await callHook(plugin.load as UnknownHook, {}, "\0virtual:cliff");
+    expect(String(loaded)).toContain("export const resources");
+
+    expect(() =>
+      transformCliffModule(
+        "not cliff",
+        join(root, "src", "locales", "zh-CN", "settings.cliff"),
+        root,
+      ),
+    ).toThrow(CliffPluginError);
+  });
+
+  it("can disable reload and skip missing virtual modules", async () => {
+    const root = await fixture();
+    const plugin = cliff({ root, dirs: ["src/locales"], reloadOnChange: false });
+    const send = vi.fn();
+    const server = {
+      moduleGraph: { getModuleById: () => undefined, invalidateModule: vi.fn() },
+      ws: { send },
+    };
+    const result = await callHook(
+      plugin.handleHotUpdate as UnknownHook,
+      {},
+      {
+        file: join(root, "src", "locales", "zh-CN", "settings.cliff"),
+        server,
+      },
+    );
+    expect(result).toEqual([]);
+    expect(send).not.toHaveBeenCalled();
   });
 });

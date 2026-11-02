@@ -75,7 +75,7 @@ Deliberate differences:
 - Flat and nested JSON are lossy; CLIFF-shaped JSON is the lossless form.
 - The i18n runtime does not implement i18next plural/context key conventions; use CLIFF IDs and ICU.
 - ICU markup is rendered through parts; the runtime does not evaluate HTML.
-- No CLI or Node file loader is part of 0.1.0.
+- No CLI or Node file loader is included.
 - No benchmark is included.
 
 ## Running

@@ -1,6 +1,6 @@
 {
   "name": "@cliff-format/translate",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "CLIFF-native translation with the DeepSeek API",
   "license": "MIT",
   "type": "module",
@@ -41,7 +41,7 @@
     "test": "vitest run"
   },
   "peerDependencies": {
-    "@cliff-format/core": "^0.1.0"
+    "@cliff-format/core": "^0.2.0"
   },
   "devDependencies": {
     "@cliff-format/core": "workspace:*"
