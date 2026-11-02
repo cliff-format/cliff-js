@@ -34,9 +34,9 @@ for (const directory of directories) {
   }
 
   const args = dryRun
-    ? ["publish", "--dry-run", "--access", "public"]
-    : ["publish", "--access", "public", "--provenance"];
-  console.log((dryRun ? "Dry-run publishing " : "Publishing ") + specifier);
+    ? ["stage", "publish", "--dry-run", "--access", "public"]
+    : ["stage", "publish", "--access", "public", "--provenance"];
+  console.log((dryRun ? "Dry-run staging " : "Staging ") + specifier);
   const result = spawnSync(npm, args, {
     cwd: resolve(directory),
     stdio: "inherit",

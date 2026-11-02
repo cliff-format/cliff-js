@@ -38,6 +38,8 @@ jobs:
           node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org
+      - name: Upgrade npm for staged publishing
+        run: npm install -g npm@12.2.0
       - run: pnpm install --frozen-lockfile
       - name: Fetch the release branch
         run: git fetch origin main

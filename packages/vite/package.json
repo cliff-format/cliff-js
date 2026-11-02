@@ -1,6 +1,6 @@
 {
   "name": "@cliff-format/vite",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Vite plugin for importing CLIFF files and generating typed entry IDs",
   "license": "MIT",
   "type": "module",
@@ -37,7 +37,7 @@
     "test": "vitest run"
   },
   "peerDependencies": {
-    "@cliff-format/core": "^0.2.0",
+    "@cliff-format/core": "^0.2.1",
     "vite": ">=5"
   },
   "peerDependenciesMeta": {
