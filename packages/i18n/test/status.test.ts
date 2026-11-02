@@ -128,6 +128,19 @@ describe("automatic status reconciliation", () => {
     expect(t("final").entry()?.target).toBe("最终");
   });
 
+  it("renders the classic reviewed chain as a new draft", () => {
+    const i18n = makeI18n();
+    const t = scoped(i18n);
+    const rendered = t("new-reviewed")
+      .source("Reviewed")
+      .type(TYPE.label)
+      .target("已审核")
+      .status("reviewed")
+      .render();
+    expect(rendered).toBe("已审核");
+    expect(t("new-reviewed").entry()?.status).toBe("reviewed");
+  });
+
   it("keeps an explicitly supplied status", () => {
     const i18n = makeI18n();
     const t = scoped(i18n);
