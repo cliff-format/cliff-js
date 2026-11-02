@@ -18,66 +18,66 @@ export class CliffScopeError extends CliffI18nError {
 }
 
 export class CliffScopeMismatchError extends CliffScopeError {
-  readonly key: string;
+  readonly entryId: string;
 
-  constructor(key: string, scope: TranslationScope, expected: string) {
+  constructor(entryId: string, scope: TranslationScope, expected: string) {
     super(
-      `key "${key}" resolves outside the active scope (${scope.namespace}.${scope.clan}); expected ${expected}`,
+      `entry ID "${entryId}" resolves outside the active scope (${scope.namespace}.${scope.clan}); expected ${expected}`,
       scope,
     );
     this.name = "CliffScopeMismatchError";
-    this.key = key;
+    this.entryId = entryId;
   }
 }
 
-export class CliffMissingKeyError extends CliffI18nError {
-  readonly key: string;
+export class CliffMissingEntryError extends CliffI18nError {
+  readonly entryId: string;
   readonly locale: string;
 
-  constructor(key: string, locale: string) {
-    super(`missing CLIFF entry "${key}" for locale "${locale}"`);
-    this.name = "CliffMissingKeyError";
-    this.key = key;
+  constructor(entryId: string, locale: string) {
+    super(`missing CLIFF entry "${entryId}" for locale "${locale}"`);
+    this.name = "CliffMissingEntryError";
+    this.entryId = entryId;
     this.locale = locale;
   }
 }
 
-export class CliffAmbiguousKeyError extends CliffI18nError {
-  readonly key: string;
+export class CliffAmbiguousEntryError extends CliffI18nError {
+  readonly entryId: string;
   readonly candidates: readonly string[];
 
-  constructor(key: string, candidates: readonly string[]) {
-    super(`ambiguous CLIFF key "${key}"; candidates: ${candidates.join(", ")}`);
-    this.name = "CliffAmbiguousKeyError";
-    this.key = key;
+  constructor(entryId: string, candidates: readonly string[]) {
+    super(`ambiguous CLIFF entry "${entryId}"; candidates: ${candidates.join(", ")}`);
+    this.name = "CliffAmbiguousEntryError";
+    this.entryId = entryId;
     this.candidates = candidates;
   }
 }
 
-export class CliffDuplicateKeyError extends CliffI18nError {
-  readonly key: string;
+export class CliffDuplicateEntryError extends CliffI18nError {
+  readonly entryId: string;
   readonly locale: string;
 
-  constructor(key: string, locale: string) {
-    super(`duplicate canonical CLIFF id "${key}" for locale "${locale}"`);
-    this.name = "CliffDuplicateKeyError";
-    this.key = key;
+  constructor(entryId: string, locale: string) {
+    super(`duplicate canonical CLIFF entry ID "${entryId}" for locale "${locale}"`);
+    this.name = "CliffDuplicateEntryError";
+    this.entryId = entryId;
     this.locale = locale;
   }
 }
 
 export class CliffMissingMetadataError extends CliffI18nError {
-  readonly key: string;
+  readonly entryId: string;
   readonly fields: readonly string[];
 
-  constructor(key: string, fields: readonly string[], detail = "") {
+  constructor(entryId: string, fields: readonly string[], detail = "") {
     super(
-      `entry ${key} is missing required CLIFF field${fields.length === 1 ? "" : "s"} ${fields
+      `entry ${entryId} is missing required CLIFF field${fields.length === 1 ? "" : "s"} ${fields
         .map((field) => `"${field}"`)
         .join(", ")}${detail ? "; " + detail : ""}`,
     );
     this.name = "CliffMissingMetadataError";
-    this.key = key;
+    this.entryId = entryId;
     this.fields = fields;
   }
 }

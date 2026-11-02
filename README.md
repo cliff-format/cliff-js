@@ -44,7 +44,7 @@ and 1.1, plus the [cliff-test](https://github.com/cliff-format/cliff-test) confo
 | [`@cliff-format/json`](packages/json/README.md) | CLIFF-shaped, flat and nested JSON conversion |
 | [`@cliff-format/i18n`](packages/i18n/README.md) | CLIFF-native runtime, `t()` builder, ICU and React adapter |
 | [`@cliff-format/translate`](packages/translate/README.md) | DeepSeek translation with CLIFF input and output |
-| [`@cliff-format/vite`](packages/vite/README.md) | `.cliff` imports, `virtual:cliff` and typed keys |
+| [`@cliff-format/vite`](packages/vite/README.md) | `.cliff` imports, `virtual:cliff` and typed entry IDs |
 
 The core package contains no Node built-ins and no runtime dependencies. `@cliff-format/json`
 declares `@cliff-format/core` as a peer dependency.
@@ -252,7 +252,7 @@ const translator = createDeepSeekTranslator({
 const result = await translator.translate(cliffText, { targetLanguage: "zh-CN" });
 ~~~
 
-See [docs/web-localization.md](docs/web-localization.md) for the key grammar, builder states and
+See [docs/web-localization.md](docs/web-localization.md) for the entry ID grammar, builder states and
 runtime design.
 
 ## API
@@ -266,7 +266,7 @@ runtime design.
 | `serialize(document, options?)` | Canonical CLIFF output. |
 | `displayWidth(text)` | Rendered display width under UAX #11, with grapheme clustering. |
 | `effectiveContext / effectiveType / effectiveEmotion / effectiveMaxWidth` | Resolve a group-inherited value for one entry. |
-| `canonicalId / isName / isTag / normalizeIdentifier` | Identifier rules and canonical ids. |
+| `canonicalId / isName / isTag / normalizeIdentifier` | Identifier rules and canonical IDs. |
 | `toCliJson / fromCliJson / toJsonString / fromJsonString` | Lossless CLIFF-shaped JSON. |
 | `fromFlatJson / toFlatJson / fromNestedJson / toNestedJson` | Runtime-resource JSON views. |
 

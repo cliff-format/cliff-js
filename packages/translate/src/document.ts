@@ -9,7 +9,7 @@ import {
 import type { MergedTranslation, OverwriteMode } from "./types.js";
 
 export interface EntryLocation {
-  key: string;
+  entryId: string;
   group: CliffGroup;
   entry: CliffEntry;
 }
@@ -42,7 +42,7 @@ export function entryLocations(document: CliffDocument): EntryLocation[] {
   for (const group of document.groups) {
     for (const entry of group.entries) {
       locations.push({
-        key: canonicalId(document.header.namespace, document.header.clan, group.path, entry.id),
+        entryId: canonicalId(document.header.namespace, document.header.clan, group.path, entry.id),
         group,
         entry,
       });
@@ -66,7 +66,7 @@ export function batchDocument(
   selected: readonly EntryLocation[],
 ): CliffDocument {
   const cloned = cloneDocument(document);
-  const allowed = new Set(selected.map((location) => location.key));
+  const allowed = new Set(selected.map((location) => location.entryId));
   const groups: CliffGroup[] = [];
   for (const group of cloned.groups) {
     const entries = group.entries.filter((entry) =>
@@ -120,27 +120,27 @@ export function mergeTargets(
   },
 ): MergedTranslation {
   const result = cloneDocument(original);
-  const translatedByKey = new Map(
-    entryLocations(translated).map((location) => [location.key, location.entry]),
+  const translatedByEntryId = new Map(
+    entryLocations(translated).map((location) => [location.entryId, location.entry]),
   );
-  const selected = new Set(options.selected.map((location) => location.key));
+  const selected = new Set(options.selected.map((location) => location.entryId));
   const untranslated: string[] = [];
   const structuralChanges: string[] = [];
   const corrections: Correction[] = [...translated.corrections];
   const originalLocations = entryLocations(result);
 
   for (const location of originalLocations) {
-    if (!selected.has(location.key)) continue;
-    const candidate = translatedByKey.get(location.key);
+    if (!selected.has(location.entryId)) continue;
+    const candidate = translatedByEntryId.get(location.entryId);
     if (candidate === undefined) {
-      untranslated.push(location.key);
+      untranslated.push(location.entryId);
       continue;
     }
     if (candidate.source !== undefined && candidate.source !== location.entry.source) {
-      structuralChanges.push("source-changed:" + location.key);
+      structuralChanges.push("source-changed:" + location.entryId);
     }
     if (candidate.target === undefined) {
-      untranslated.push(location.key);
+      untranslated.push(location.entryId);
       continue;
     }
     if (
@@ -153,9 +153,9 @@ export function mergeTargets(
     location.entry.status = options.status;
   }
 
-  for (const key of translatedByKey.keys()) {
-    if (!originalLocations.some((location) => location.key === key)) {
-      structuralChanges.push("unknown-entry:" + key);
+  for (const entryId of translatedByEntryId.keys()) {
+    if (!originalLocations.some((location) => location.entryId === entryId)) {
+      structuralChanges.push("unknown-entry:" + entryId);
     }
   }
 

@@ -26,10 +26,12 @@ export function transformCliffModule(
       { cause: error },
     );
   }
-  const keys: string[] = [];
+  const entryIds: string[] = [];
   for (const group of document.groups) {
     for (const entry of group.entries) {
-      keys.push(canonicalId(document.header.namespace, document.header.clan, group.path, entry.id));
+      entryIds.push(
+        canonicalId(document.header.namespace, document.header.clan, group.path, entry.id),
+      );
     }
   }
   const meta = {
@@ -37,7 +39,7 @@ export function transformCliffModule(
     namespace: document.header.namespace,
     clan: document.header.clan,
     locale: document.header.targetLanguage,
-    keys,
+    entryIds,
   };
   return {
     code: [
@@ -48,7 +50,7 @@ export function transformCliffModule(
       "export const namespace = " + JSON.stringify(document.header.namespace) + ";",
       "export const clan = " + JSON.stringify(document.header.clan) + ";",
       "export const locale = " + JSON.stringify(document.header.targetLanguage) + ";",
-      "export const keys = " + JSON.stringify(keys) + ";",
+      "export const entryIds = " + JSON.stringify(entryIds) + ";",
       "",
     ].join("\n"),
     map: null,

@@ -1,7 +1,7 @@
 {
   "name": "@cliff-format/vite",
   "version": "0.1.0",
-  "description": "Vite plugin for importing CLIFF files and generating typed localization keys",
+  "description": "Vite plugin for importing CLIFF files and generating typed entry IDs",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,

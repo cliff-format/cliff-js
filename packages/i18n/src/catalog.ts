@@ -14,8 +14,8 @@ import {
   type ValidationIssue,
   validateDocument,
 } from "@cliff-format/core";
-import { CliffDuplicateKeyError, CliffI18nError } from "./errors.js";
-import type { KeyCatalogContext } from "./key.js";
+import type { EntryIdCatalogContext } from "./entry-id.js";
+import { CliffDuplicateEntryError, CliffI18nError } from "./errors.js";
 import { statusOf } from "./status.js";
 import type {
   CliffFile,
@@ -33,7 +33,7 @@ export interface CatalogOptions {
   defaultGroup?: string;
 }
 
-function localeKey(tag: string): string {
+function normalizeLocale(tag: string): string {
   return tag.toLowerCase();
 }
 
@@ -90,7 +90,7 @@ function recordFrom(document: CliffDocument, group: CliffGroup, entry: CliffEntr
   };
 }
 
-export class Catalog implements KeyCatalogContext {
+export class Catalog implements EntryIdCatalogContext {
   readonly defaultGroup: string;
   readonly aliases: Readonly<Record<string, string>>;
   private readonly documentsList: CliffDocument[] = [];
@@ -126,11 +126,11 @@ export class Catalog implements KeyCatalogContext {
 
   addDocument(document: CliffDocument): MessageRecord[] {
     const locale = document.header.targetLanguage;
-    const key = localeKey(locale);
-    let localeMap = this.byLocale.get(key);
+    const localeTag = normalizeLocale(locale);
+    let localeMap = this.byLocale.get(localeTag);
     if (localeMap === undefined) {
       localeMap = new Map<string, MessageRecord>();
-      this.byLocale.set(key, localeMap);
+      this.byLocale.set(localeTag, localeMap);
     }
 
     const added: MessageRecord[] = [];
@@ -138,7 +138,7 @@ export class Catalog implements KeyCatalogContext {
       for (const entry of group.entries) {
         const record = recordFrom(document, group, entry);
         if (localeMap.has(record.canonical)) {
-          throw new CliffDuplicateKeyError(record.canonical, locale);
+          throw new CliffDuplicateEntryError(record.canonical, locale);
         }
         this.indexRecord(record, localeMap);
         added.push(record);
@@ -196,16 +196,16 @@ export class Catalog implements KeyCatalogContext {
     if (draft.reviewer !== undefined) entry.reviewer = draft.reviewer;
 
     const canonical = canonicalId(parts.namespace, parts.clan, parts.group, parts.id);
-    const localeMap = this.byLocale.get(localeKey(parts.targetLanguage));
+    const localeMap = this.byLocale.get(normalizeLocale(parts.targetLanguage));
     if (localeMap?.has(canonical) === true) {
-      throw new CliffDuplicateKeyError(canonical, parts.targetLanguage);
+      throw new CliffDuplicateEntryError(canonical, parts.targetLanguage);
     }
 
     group.entries.push(entry);
     const record = recordFrom(document, group, entry);
     if (localeMap === undefined) {
       const created = new Map<string, MessageRecord>();
-      this.byLocale.set(localeKey(parts.targetLanguage), created);
+      this.byLocale.set(normalizeLocale(parts.targetLanguage), created);
       this.indexRecord(record, created);
     } else {
       this.indexRecord(record, localeMap);
@@ -227,7 +227,7 @@ export class Catalog implements KeyCatalogContext {
       (document) =>
         document.header.namespace === parts.namespace &&
         document.header.clan === parts.clan &&
-        localeKey(document.header.targetLanguage) === localeKey(parts.targetLanguage),
+        normalizeLocale(document.header.targetLanguage) === normalizeLocale(parts.targetLanguage),
     );
     if (existing !== undefined) return existing;
 
@@ -280,7 +280,7 @@ export class Catalog implements KeyCatalogContext {
   }
 
   record(canonical: string, locale: string): MessageRecord | undefined {
-    return this.byLocale.get(localeKey(locale))?.get(canonical);
+    return this.byLocale.get(normalizeLocale(locale))?.get(canonical);
   }
 
   selectRecord(
@@ -292,17 +292,17 @@ export class Catalog implements KeyCatalogContext {
     if (records === undefined) return undefined;
     for (const tag of localeChain) {
       const found = records.find(
-        (record) => localeKey(record.locale) === tag && record.target !== undefined,
+        (record) => normalizeLocale(record.locale) === tag && record.target !== undefined,
       );
       if (found !== undefined) return found;
     }
     for (const tag of localeChain) {
-      const found = records.find((record) => localeKey(record.locale) === tag);
+      const found = records.find((record) => normalizeLocale(record.locale) === tag);
       if (found !== undefined) return found;
     }
     if (sourceLanguage !== undefined) {
       const found = records.find(
-        (record) => localeKey(record.locale) === localeKey(sourceLanguage),
+        (record) => normalizeLocale(record.locale) === normalizeLocale(sourceLanguage),
       );
       if (found !== undefined) return found;
     }
@@ -317,7 +317,7 @@ export class Catalog implements KeyCatalogContext {
     const tags: string[] = [];
     const add = (tag: string): void => {
       for (const variant of localeVariants(tag)) {
-        const normalized = localeKey(variant);
+        const normalized = normalizeLocale(variant);
         if (normalized.length > 0 && !tags.includes(normalized)) tags.push(normalized);
       }
     };
@@ -361,8 +361,8 @@ export class Catalog implements KeyCatalogContext {
     return [...groups].sort();
   }
 
-  keys(scope: Partial<TranslationScope> = {}): string[] {
-    const keys = new Set<string>();
+  entryIds(scope: Partial<TranslationScope> = {}): string[] {
+    const entryIds = new Set<string>();
     for (const records of this.byCanonical.values()) {
       for (const record of records) {
         if (scope.namespace !== undefined && record.namespace !== scope.namespace) continue;
@@ -374,10 +374,10 @@ export class Catalog implements KeyCatalogContext {
         ) {
           continue;
         }
-        keys.add(record.canonical);
+        entryIds.add(record.canonical);
       }
     }
-    return [...keys].sort();
+    return [...entryIds].sort();
   }
 
   allRecords(): MessageRecord[] {
@@ -404,7 +404,7 @@ export class Catalog implements KeyCatalogContext {
       if (
         options.locale !== undefined &&
         options.locale !== "all" &&
-        localeKey(record.locale) !== localeKey(options.locale)
+        normalizeLocale(record.locale) !== normalizeLocale(options.locale)
       ) {
         return false;
       }

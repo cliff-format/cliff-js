@@ -51,7 +51,7 @@ plus fields such as `source`, `target`, `type` and `status`. The canonical ID is
 The argument to `t("...")` is a runtime lookup key. It resolves to that entry ID, or to a scoped
 short form of it. `key: value` in a CLIFF file is field syntax; it is not the format's data model.
 
-## Key syntax
+## Entry ID syntax
 
 Every input form resolves to a CLIFF canonical ID. None of them is a fuzzy match.
 
@@ -64,7 +64,7 @@ Every input form resolves to a CLIFF canonical ID. None of them is a fuzzy match
 | Scope group | `video.resolution` |
 | Unique entry | `resolution` |
 
-If a key is ambiguous, the default `strictKeys: true` throws `CliffAmbiguousKeyError`. Set it
+If an entry ID is ambiguous, the default `strictEntryIds: true` throws `CliffAmbiguousEntryError`. Set it
 to `false` only when a deterministic diagnostic-assisted choice is acceptable.
 
 Aliases are explicit:
@@ -79,7 +79,7 @@ createI18n({
 
 ## Authoring states
 
-`t("key")` returns a builder. Calling `.source()` enters authoring mode; `render()` and
+`t("home.title")` returns a builder. Calling `.source()` enters authoring mode; `render()` and
 `commit()` do not exist until a type is supplied.
 
 ~~~ts
@@ -204,7 +204,7 @@ t("features.context-title").render();
 t("format.line-1").render();
 ~~~
 
-The `group` option is a convenience prefix for a component whose keys all belong to one group. Do
+The `group` option is a convenience prefix for a component whose entry IDs all belong to one group. Do
 not call `useTranslation` once per section in the same component: each call creates another scoped
 translator and another locale subscription.
 

@@ -153,25 +153,25 @@ The full entry uses `messageformat` for MF2 and `@messageformat/icu-messageforma
 `@cliff-format/i18n/lite` excludes those dependencies. `@cliff-format/i18n/react` exports
 `I18nProvider`, `useI18n` and `useTranslation`.
 
-### Key input
+### Entry ID input
 
 ```ts
-type KeyInput =
+type EntryIdInput =
   | string
   | { namespace?: string; clan?: string; group?: string; id: string };
 ```
 
 Strings accept `namespace:clan.group.id`, `namespace.clan.group.id`,
-`namespace/clan/group/id`, scoped short keys and unique ids. Ambiguity throws
-`CliffAmbiguousKeyError`; a full key outside the scope throws `CliffScopeMismatchError`.
+`namespace/clan/group/id`, scoped short entry IDs and unique IDs. Ambiguity throws
+`CliffAmbiguousEntryError`; a full entry ID outside the scope throws `CliffScopeMismatchError`.
 
 ### Builder
 
 ```ts
-t("key")                         // MessageBuilder<{ source: false; type: false }>
-t("key", params)                 // string
-t("key").render()                // lookup
-t("key").source("Text")          // authoring; render is never until type is supplied
+t("home.title")                  // MessageBuilder<{ source: false; type: false }>
+t("home.title", params)          // string
+t("home.title").render()         // lookup
+t("home.title").source("Text")   // authoring; render is never until type is supplied
   .type(TYPE.label)              // A
   .typeFromGroup()               // B: explicit group inheritance
   .emotion(EMOTION.objective)
@@ -184,7 +184,7 @@ effective `type` and `status` are enforced. `emotion` is optional by CLIFF and d
 
 ### Diagnostics
 
-`missing-key`, `ambiguous-key`, `type-mismatch`, `emotion-mismatch`, `source-mismatch`,
+`missing-entry`, `ambiguous-entry`, `type-mismatch`, `emotion-mismatch`, `source-mismatch`,
 `width-exceeded`, `icu-error`, `draft-created`, `fallback-used` and related codes are delivered
 through `onDiagnostic` and `diagnostics()`.
 
@@ -212,7 +212,7 @@ cliff(options?): Plugin
 ```
 
 Transforms `.cliff` into a module whose default export is the raw CLIFF string, generates
-`virtual:cliff` resources and an ambient `CliffKey` union. Options: `dirs`, `include`,
+`virtual:cliff` resources and an ambient `CliffEntryId` union. Options: `dirs`, `include`,
 `exclude`, `virtualModule`, `dts`, `typegen`, `reloadOnChange`. See the
 [Vite package README](../packages/vite/README.md).
 
@@ -224,5 +224,5 @@ Transforms `.cliff` into a module whose default export is the raw CLIFF string, 
 - `UnsupportedSpecVersion` (`declared`, `supported`)
 - `CliffLimitError` (`limit`, `observed`)
 - `CliffModelError`
-- `CliffScopeError`, `CliffScopeMismatchError`, `CliffMissingKeyError`, `CliffAmbiguousKeyError`, `CliffDuplicateKeyError`, `CliffMissingMetadataError`, `CliffIcuError`
+- `CliffScopeError`, `CliffScopeMismatchError`, `CliffMissingEntryError`, `CliffAmbiguousEntryError`, `CliffDuplicateEntryError`, `CliffMissingMetadataError`, `CliffIcuError`
 - `DeepSeekConfigError`, `DeepSeekHttpError`, `TranslationParseError`, `TranslationValidationError`

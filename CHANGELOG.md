@@ -8,7 +8,7 @@ that matter to people building against the library.
 
 ### New Features
 
-- Added `@cliff-format/i18n`, a CLIFF-native web runtime with a scoped `t()` builder, canonical-key
+- Added `@cliff-format/i18n`, a CLIFF-native web runtime with a scoped `t()` builder, canonical entry ID
   resolution, locale fallback, a compile-time source/type state machine, diagnostics and React
   bindings.
 - Added full ICU support: MessageFormat 2 through `messageformat`, and MessageFormat 1 through
@@ -16,9 +16,9 @@ that matter to people building against the library.
   opt-out `@cliff-format/i18n/lite` entry.
 - Added `@cliff-format/translate`, a server/build-side DeepSeek client that sends and receives
   CLIFF only. Defaults are `deepseek-flash`, temperature 1.3 and disabled thinking; responses are
-  parsed tolerantly and merged by canonical id.
+  parsed tolerantly and merged by canonical entry ID.
 - Added `@cliff-format/vite`, which imports `.cliff` files as raw CLIFF modules, generates
-  `virtual:cliff` resources and an ambient `CliffKey` union, and refreshes both on HMR.
+  `virtual:cliff` resources and an ambient `CliffEntryId` union, and refreshes both on HMR.
 - Added status queries and enum-like vocabulary exports: `query()`, `untranslated()`,
   `byStatus()`, `statusCounts()`, `STATUS`, `VARIANT`, vocabulary guards and
   `canTransitionStatus()`. Writes now reconcile `initial`/`translated`/review invalidation
@@ -27,6 +27,10 @@ that matter to people building against the library.
 
 ### Other Changes
 
+- Renamed runtime key-facing types to match the CLIFF data model: `CliffKey` → `CliffEntryId`,
+  `KeyInput` → `EntryIdInput`, `ResolvedKey` → `ResolvedEntryId`, and the missing/ambiguous/
+  duplicate error classes to `*EntryError`. Collection methods are now `entryIds()`. The `missing`
+  option value `"key"` is now `"entryId"`.
 - Added package-boundary, version, browser-bundle, publint and Are the Types Wrong checks for the
   new packages.
 - Updated the root README, architecture, API, browser and conformance documentation.

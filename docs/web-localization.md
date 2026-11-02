@@ -1,7 +1,7 @@
 # Web Localization With CLIFF
 
 This document defines the web localization layer built on top of `@cliff-format/core`. It explains
-why the API looks the way it does, how keys are resolved, and which CLIFF guarantees the runtime
+why the API looks the way it does, how entry IDs are resolved, and which CLIFF guarantees the runtime
 preserves. It is the design record for `@cliff-format/i18n`, `@cliff-format/translate` and
 `@cliff-format/vite`.
 
@@ -42,11 +42,11 @@ renders it, and serializes edits back to canonical CLIFF.
 
 | Package | Responsibility |
 | --- | --- |
-| `@cliff-format/i18n` | catalog, key resolution, `t()` builder, locale fallback, ICU, diagnostics |
+| `@cliff-format/i18n` | catalog, entry ID resolution, `t()` builder, locale fallback, ICU, diagnostics |
 | `@cliff-format/i18n/lite` | the same runtime without the full ICU dependencies |
 | `@cliff-format/i18n/react` | `I18nProvider` and `useTranslation` |
 | `@cliff-format/translate` | DeepSeek client, CLIFF prompt assembly, tolerant response merge |
-| `@cliff-format/vite` | `.cliff` module transform, `virtual:cliff`, key type generation, HMR |
+| `@cliff-format/vite` | `.cliff` module transform, `virtual:cliff`, entry ID type generation, HMR |
 
 `@cliff-format/i18n` depends on `@cliff-format/core` (peer), `messageformat` and
 `@messageformat/icu-messageformat-1`. React is an optional peer used only by the react subpath.
@@ -60,15 +60,15 @@ The runtime therefore never invents defaults:
 const { t } = i18n.scope({ namespace: "demo", clan: "settings", group: "video" });
 ```
 
-The scope type requires both strings. A full key must agree with the scope; a mismatch is a
+The scope type requires both strings. A full entry ID must agree with the scope; a mismatch is a
 `CliffScopeMismatchError` rather than a silent cross-clan lookup.
 
 `createI18n()` is a resource store, not a translator. It has no `t` property. `t` comes from
 `i18n.scope()` or, in React, from `useTranslation()`.
 
-## 4. Key syntax
+## 4. Entry ID syntax
 
-All of these are first-class inputs and normalize to the same canonical id:
+All of these are first-class inputs and normalize to the same canonical entry ID:
 
 | Form | Example with scope `demo`/`settings`/group `video` |
 | --- | --- |
@@ -85,12 +85,12 @@ Notes:
   field in CLIFF. The `[video.advanced]` line is the **group path**, and the JS model property
   `CliffGroup.path` is its in-memory representation.
 - Resolution checks aliases, exact canonical ids, scope-prefix candidates, then unique suffix
-  matches. `strictKeys: true` is the default; ambiguity throws with every candidate.
-- No case folding or separator rewriting. Changing a key is changing a translation match key.
+  matches. `strictEntryIds: true` is the default; ambiguity throws with every candidate.
+- No case folding or separator rewriting. Changing an entry ID is changing a translation match.
 
 ## 5. Builder state machine
 
-`t("key")` returns `MessageBuilder<{ source: false; type: false }>`. Calling `.source()` enters
+`t("home.title")` returns `MessageBuilder<{ source: false; type: false }>`. Calling `.source()` enters
 authoring mode; `render()` and `commit()` are `never` until a type is available.
 
 ```ts
@@ -177,26 +177,26 @@ Defaults are `deepseek-flash`, `temperature: 1.3`, and `thinking: { type: "disab
 mode is on by default at the API and ignores temperature, so disabling it is required for the 1.3
 setting to matter.
 
-The package is build/server-side by design. The browser should call a proxy; the key is never part
-of the client bundle.
+The package is build/server-side by design. The browser should call a proxy; the API key is never
+part of the client bundle.
 
 ## 10. Vite
 
 The Vite plugin transforms `.cliff` into a JavaScript module whose default export is the raw CLIFF
-string, and generates `virtual:cliff` resources plus an ambient `CliffKey` union. This gives
+string, and generates `virtual:cliff` resources plus an ambient `CliffEntryId` union. This gives
 editors autocomplete without changing the file format and keeps the runtime parsing CLIFF.
 
 ## 11. Pain points addressed
 
 | Pain | Design response |
 | --- | --- |
-| Opaque string keys | canonical ids, scope, aliases and generated key unions |
+| Opaque entry ID strings | canonical IDs, scope, aliases and generated entry ID unions |
 | Metadata outside the string | CLIFF type/emotion/context/max-width travel with the entry |
 | JSON resource drift | CLIFF in, CLIFF out, no intermediate format |
-| Silent missing keys | diagnostics and explicit missing policies |
+| Silent missing entries | diagnostics and explicit missing-entry policies |
 | Hand-written ICU | official MF1/MF2 runtime and structured parts |
 | Locale switching and SSR | per-instance state, `subscribe`, `useSyncExternalStore` |
-| Translation corrupts structure | tolerant parse plus merge by canonical id |
+| Translation corrupts structure | tolerant parse plus merge by canonical entry ID |
 | Page text and resource files diverge | `.source()` drafts export as CLIFF |
 
 ## 12. Non-goals

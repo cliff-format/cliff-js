@@ -87,7 +87,9 @@ export const STATUS_ORDER = ["initial", "translated", "reviewed", "final"] as co
 
 export type Params = Record<string, unknown>;
 
-export type KeyOf<Keys extends string> = string extends Keys ? string : Keys | (string & {});
+export type EntryIdOf<EntryIds extends string> = string extends EntryIds
+  ? string
+  : EntryIds | (string & {});
 
 export type CliffResource = string | Uint8Array | CliffDocument;
 
@@ -97,7 +99,7 @@ export interface TranslationScope {
   group?: string;
 }
 
-export type KeyInput =
+export type EntryIdInput =
   | string
   | {
       namespace?: string;
@@ -117,7 +119,7 @@ export interface EntryQuery {
 
 export type StatusCounts = Record<StatusTag, number>;
 
-export interface ResolvedKey {
+export interface ResolvedEntryId {
   namespace: string;
   clan: string;
   group: string;
@@ -154,7 +156,7 @@ export interface MessageRecord {
 }
 
 export interface MessageMetadata {
-  key: string;
+  entryId: string;
   namespace: string;
   clan: string;
   group: string;
@@ -208,7 +210,7 @@ export interface MessageBuilder<S extends MessageState = { source: false; type: 
   maxWidth(cells: number): MessageBuilder<S>;
   reference(...paths: string[]): MessageBuilder<S>;
   reviewer(name: string): MessageBuilder<S>;
-  extension(key: string, value: string): MessageBuilder<S>;
+  extension(name: string, value: string): MessageBuilder<S>;
   target(text: string, params?: Params): MessageBuilder<S>;
   status(tag: StatusTag): MessageBuilder<S>;
   locale(tag: string): MessageBuilder<S>;
@@ -226,23 +228,23 @@ export interface MessageBuilder<S extends MessageState = { source: false; type: 
   toString(): string;
 }
 
-export interface TFunction<Keys extends string = string> {
-  (key: KeyOf<Keys>): MessageBuilder<{ source: false; type: false }>;
-  (key: KeyOf<Keys>, params: Params): string;
-  render(key: KeyOf<Keys>, params?: Params): string;
-  renderToParts(key: KeyOf<Keys>, params?: Params): MessagePart[];
-  has(key: KeyOf<Keys>): boolean;
-  entry(key: KeyOf<Keys>): CliffEntry | undefined;
-  meta(key: KeyOf<Keys>): MessageMetadata | undefined;
-  keys(): string[];
+export interface TFunction<EntryIds extends string = string> {
+  (entryId: EntryIdOf<EntryIds>): MessageBuilder<{ source: false; type: false }>;
+  (entryId: EntryIdOf<EntryIds>, params: Params): string;
+  render(entryId: EntryIdOf<EntryIds>, params?: Params): string;
+  renderToParts(entryId: EntryIdOf<EntryIds>, params?: Params): MessagePart[];
+  has(entryId: EntryIdOf<EntryIds>): boolean;
+  entry(entryId: EntryIdOf<EntryIds>): CliffEntry | undefined;
+  meta(entryId: EntryIdOf<EntryIds>): MessageMetadata | undefined;
+  entryIds(): string[];
 }
 
-export interface ScopedI18n<Keys extends string = string> {
-  readonly t: TFunction<Keys>;
+export interface ScopedI18n<EntryIds extends string = string> {
+  readonly t: TFunction<EntryIds>;
   readonly scope: TranslationScope;
 }
 
-export type MissingBehavior = "key" | "empty" | "throw" | "source";
+export type MissingBehavior = "entryId" | "empty" | "throw" | "source";
 export type WidthPolicy = "off" | "warn" | "error";
 export type DiagnosticSeverity = "error" | "warning" | "info";
 
@@ -250,7 +252,7 @@ export interface I18nDiagnostic {
   code: string;
   severity: DiagnosticSeverity;
   message: string;
-  key?: string;
+  entryId?: string;
   locale?: string;
   namespace?: string;
   clan?: string;
@@ -268,7 +270,7 @@ export interface I18nOptions {
   params?: Params;
   aliases?: Readonly<Record<string, string>>;
   missing?: MissingBehavior;
-  strictKeys?: boolean;
+  strictEntryIds?: boolean;
   requireEmotion?: boolean | readonly TypeTag[];
   enforceMaxWidth?: WidthPolicy;
   icu?: IcuRuntime;
@@ -315,7 +317,7 @@ export interface CliffFile {
   document: CliffDocument;
 }
 
-export interface I18n<Keys extends string = string> {
+export interface I18n<EntryIds extends string = string> {
   readonly locale: string;
   readonly language: string;
   readonly sourceLanguage: string | undefined;
@@ -324,12 +326,18 @@ export interface I18n<Keys extends string = string> {
   changeLanguage(locale: string): void;
   getVersion(): number;
   subscribe(listener: () => void): () => void;
-  scope(scope: TranslationScope): ScopedI18n<Keys>;
+  scope(scope: TranslationScope): ScopedI18n<EntryIds>;
   add(resource: CliffResource, options?: AddOptions): AddResult;
   addDocument(document: CliffDocument, options?: AddOptions): AddResult;
-  has(key: KeyOf<Keys> | Exclude<KeyInput, string>, scope: TranslationScope): boolean;
-  resolve(key: KeyOf<Keys> | Exclude<KeyInput, string>, scope: TranslationScope): ResolvedKey;
-  keys(scope?: Partial<TranslationScope>): string[];
+  has(
+    entryId: EntryIdOf<EntryIds> | Exclude<EntryIdInput, string>,
+    scope: TranslationScope,
+  ): boolean;
+  resolve(
+    entryId: EntryIdOf<EntryIds> | Exclude<EntryIdInput, string>,
+    scope: TranslationScope,
+  ): ResolvedEntryId;
+  entryIds(scope?: Partial<TranslationScope>): string[];
   query(options?: EntryQuery): MessageRecord[];
   untranslated(options?: Omit<EntryQuery, "status" | "target">): MessageRecord[];
   byStatus(status: StatusTag, options?: Omit<EntryQuery, "status">): MessageRecord[];
@@ -356,7 +364,7 @@ export interface I18n<Keys extends string = string> {
 }
 
 export interface I18nRuntime {
-  resolve(key: KeyInput, scope: TranslationScope): ResolvedKey;
+  resolve(entryId: EntryIdInput, scope: TranslationScope): ResolvedEntryId;
   recordFor(canonical: string, locale: string): MessageRecord | undefined;
   format(
     message: string,

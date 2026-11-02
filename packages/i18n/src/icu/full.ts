@@ -90,16 +90,16 @@ export function createFullIcu(): IcuRuntime {
   const cache = new Map<string, Compiled | { kind: "error"; error: IcuError }>();
 
   const get = (message: string, locale: string): Compiled | { kind: "error"; error: IcuError } => {
-    const key = `${locale}\u0000${message}`;
-    const cached = cache.get(key);
+    const cacheKey = `${locale}\u0000${message}`;
+    const cached = cache.get(cacheKey);
     if (cached !== undefined) return cached;
     try {
       const compiled = compile(message, locale);
-      cache.set(key, compiled);
+      cache.set(cacheKey, compiled);
       return compiled;
     } catch (error) {
       const failed = { kind: "error" as const, error: toIcuError(error) };
-      cache.set(key, failed);
+      cache.set(cacheKey, failed);
       return failed;
     }
   };

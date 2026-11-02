@@ -248,7 +248,7 @@ export async function translateWithClient(
     result = merged.document;
     usage = addUsage(usage, outcome.usage);
     corrections.push(...merged.corrections);
-    for (const key of merged.untranslated) untranslated.add(key);
+    for (const entryId of merged.untranslated) untranslated.add(entryId);
     for (const change of merged.structuralChanges) structuralChanges.add(change);
     const progress: TranslateProgress = {
       batch: index + 1,

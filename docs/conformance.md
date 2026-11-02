@@ -16,7 +16,7 @@ version line for a new document is `CLIFF 1.1`; a round-tripped 1.0 document kee
 | `tolerant` fixtures | strict rejection, tolerant repair, strict-valid output and idempotence |
 | `style` fixtures | zero hard errors and at least one style warning |
 | Unrepairable tolerant fixtures | refused with a located error |
-| i18n tests | key resolution, scope enforcement, builder states, CLIFF round trip, ICU, React SSR |
+| i18n tests | entry ID resolution, scope enforcement, builder states, CLIFF round trip, ICU, React SSR |
 | translate tests | DeepSeek defaults, fenced CLIFF, target merge, batching, repair |
 | vite tests | scanning, virtual module, type generation, transform hooks |
 

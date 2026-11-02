@@ -1,8 +1,8 @@
 import { isName } from "@cliff-format/core";
-import { CliffAmbiguousKeyError, CliffScopeError, CliffScopeMismatchError } from "./errors.js";
-import type { KeyInput, MessageRecord, ResolvedKey, TranslationScope } from "./types.js";
+import { CliffAmbiguousEntryError, CliffScopeError, CliffScopeMismatchError } from "./errors.js";
+import type { EntryIdInput, MessageRecord, ResolvedEntryId, TranslationScope } from "./types.js";
 
-export interface KeyCatalogContext {
+export interface EntryIdCatalogContext {
   readonly knownNamespaces: ReadonlySet<string>;
   readonly knownClans: ReadonlySet<string>;
   readonly defaultGroup: string;
@@ -12,7 +12,7 @@ export interface KeyCatalogContext {
   suffixMatches(suffix: string): readonly string[];
 }
 
-interface ParsedKey {
+interface ParsedEntryId {
   raw: string;
   namespace?: string;
   segments: string[];
@@ -60,10 +60,10 @@ function applyAlias(raw: string, aliases: Readonly<Record<string, string>>): str
   return current;
 }
 
-function parseStringKey(raw: string): ParsedKey {
+function parseStringEntryId(raw: string): ParsedEntryId {
   const text = raw.trim();
   if (text.length === 0) {
-    throw new CliffScopeError("key must not be empty");
+    throw new CliffScopeError("entry ID must not be empty");
   }
   const colon = /^([A-Za-z0-9_-]+):(.+)$/.exec(text);
   const namespace = colon?.[1];
@@ -76,19 +76,19 @@ function parseStringKey(raw: string): ParsedKey {
     .map((segment) => segment.trim())
     .filter((segment) => segment.length > 0);
   if (segments.length === 0) {
-    throw new CliffScopeError(`key "${raw}" has no path segments`);
+    throw new CliffScopeError(`entry ID "${raw}" has no path segments`);
   }
   for (const segment of segments) {
     if (!isName(segment)) {
       throw new CliffScopeError(
-        `key "${raw}" contains invalid segment "${segment}"; CLIFF names use A-Z a-z 0-9 _ -`,
+        `entry ID "${raw}" contains invalid segment "${segment}"; CLIFF names use A-Z a-z 0-9 _ -`,
       );
     }
   }
   return namespace === undefined ? { raw, segments } : { raw, namespace, segments };
 }
 
-function candidateKeys(parsed: ParsedKey, scope: TranslationScope): string[] {
+function candidateEntryIds(parsed: ParsedEntryId, scope: TranslationScope): string[] {
   const joined = parsed.segments.join(".");
   const out: string[] = [];
   const add = (value: string): void => {
@@ -113,7 +113,7 @@ function candidateKeys(parsed: ParsedKey, scope: TranslationScope): string[] {
   return out;
 }
 
-function partsOfRecord(record: MessageRecord): ResolvedKey {
+function partsOfRecord(record: MessageRecord): ResolvedEntryId {
   return {
     namespace: record.namespace,
     clan: record.clan,
@@ -161,11 +161,11 @@ function validateGroup(group: string): void {
   }
 }
 
-function parseAuthoringKey(
-  parsed: ParsedKey,
+function parseAuthoringEntryId(
+  parsed: ParsedEntryId,
   scope: TranslationScope,
-  context: KeyCatalogContext,
-): ResolvedKey {
+  context: EntryIdCatalogContext,
+): ResolvedEntryId {
   if (parsed.namespace !== undefined && parsed.namespace !== scope.namespace) {
     throw new CliffScopeMismatchError(
       parsed.raw,
@@ -214,7 +214,7 @@ function parseAuthoringKey(
   }
 
   if (segments.length === 0) {
-    throw new CliffScopeError(`key "${parsed.raw}" has no entry id`);
+    throw new CliffScopeError(`entry ID "${parsed.raw}" has no entry id`);
   }
 
   const id = segments[segments.length - 1] as string;
@@ -244,11 +244,11 @@ function parseAuthoringKey(
   };
 }
 
-function resolveObjectKey(
-  input: NonNullable<Exclude<KeyInput, string>>,
+function resolveObjectEntryId(
+  input: NonNullable<Exclude<EntryIdInput, string>>,
   scope: TranslationScope,
-  context: KeyCatalogContext,
-): ResolvedKey {
+  context: EntryIdCatalogContext,
+): ResolvedEntryId {
   const namespace = input.namespace ?? scope.namespace;
   const clan = input.clan ?? scope.clan;
   const group =
@@ -281,27 +281,27 @@ function resolveObjectKey(
   };
 }
 
-export function resolveKey(
-  input: KeyInput,
+export function resolveEntryId(
+  input: EntryIdInput,
   scope: TranslationScope,
-  context: KeyCatalogContext,
-  strictKeys = true,
-): ResolvedKey {
+  context: EntryIdCatalogContext,
+  strictEntryIds = true,
+): ResolvedEntryId {
   assertScope(scope);
 
   if (typeof input !== "string") {
-    return resolveObjectKey(input, scope, context);
+    return resolveObjectEntryId(input, scope, context);
   }
 
   const raw = applyAlias(input, context.aliases);
-  const parsed = parseStringKey(raw);
+  const parsed = parseStringEntryId(raw);
   if (parsed.namespace !== undefined && parsed.namespace !== scope.namespace) {
     throw new CliffScopeMismatchError(raw, scope, `${scope.namespace}.${scope.clan}.<group>.<id>`);
   }
 
   const exact = new Map<string, MessageRecord>();
   const mismatched = new Map<string, MessageRecord>();
-  for (const candidate of candidateKeys(parsed, scope)) {
+  for (const candidate of candidateEntryIds(parsed, scope)) {
     const record = context.recordForCanonical(candidate);
     if (record === undefined) continue;
     if (record.namespace !== scope.namespace || record.clan !== scope.clan) {
@@ -331,8 +331,8 @@ export function resolveKey(
   }
   if (inScope.length > 1) {
     const candidates = inScope.map((record) => record.canonical).sort();
-    if (strictKeys) {
-      throw new CliffAmbiguousKeyError(raw, candidates);
+    if (strictEntryIds) {
+      throw new CliffAmbiguousEntryError(raw, candidates);
     }
     const chosen = chooseByGroup(inScope, scope);
     return {
@@ -345,5 +345,5 @@ export function resolveKey(
     throw new CliffScopeMismatchError(raw, scope, `${scope.namespace}.${scope.clan}.<group>.<id>`);
   }
 
-  return parseAuthoringKey(parsed, scope, context);
+  return parseAuthoringEntryId(parsed, scope, context);
 }

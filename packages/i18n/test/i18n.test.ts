@@ -1,6 +1,6 @@
 import { parse } from "@cliff-format/core";
 import {
-  CliffDuplicateKeyError,
+  CliffDuplicateEntryError,
   CliffMissingMetadataError,
   CliffScopeMismatchError,
   createI18n,
@@ -85,8 +85,8 @@ function tFor(i18n: ReturnType<typeof makeI18n>, group?: string) {
   return i18n.scope({ namespace: "demo", clan: "settings", ...(group ? { group } : {}) }).t;
 }
 
-describe("CLIFF key resolution", () => {
-  it("accepts colon, dot, slash and scoped short keys", () => {
+describe("CLIFF entry ID resolution", () => {
+  it("accepts colon, dot, slash and scoped short entry IDs", () => {
     const i18n = makeI18n();
     const t = tFor(i18n, "video");
     expect(t("resolution").render()).toBe("分辨率");
@@ -98,7 +98,7 @@ describe("CLIFF key resolution", () => {
     expect(t("resolution", {})).toBe("分辨率");
   });
 
-  it("supports group-prefixed keys", () => {
+  it("supports group-prefixed entry IDs", () => {
     const i18n = makeI18n();
     const t = tFor(i18n, "video");
     expect(t("advanced.gamma").render()).toBe("伽马");
@@ -112,17 +112,17 @@ describe("CLIFF key resolution", () => {
     expect(t("home-title").render()).toBe("为翻译者而生的本地化格式");
   });
 
-  it("rejects a full key that points outside the scope", () => {
+  it("rejects a full entry ID that points outside the scope", () => {
     const i18n = makeI18n();
     const t = tFor(i18n, "video");
     expect(() => t("demo:marketing.home.hero-title").render()).toThrow(CliffScopeMismatchError);
   });
 
-  it("returns the key for a missing entry and records a diagnostic", () => {
+  it("returns the input for a missing entry and records a diagnostic", () => {
     const i18n = makeI18n();
     const t = tFor(i18n, "video");
     expect(t("missing-entry").render()).toBe("missing-entry");
-    expect(i18n.diagnostics().some((diagnostic) => diagnostic.code === "missing-key")).toBe(true);
+    expect(i18n.diagnostics().some((diagnostic) => diagnostic.code === "missing-entry")).toBe(true);
   });
 });
 
@@ -160,7 +160,7 @@ describe("catalog and locale behavior", () => {
 
   it("rejects duplicate canonical ids in the same locale", () => {
     const i18n = makeI18n();
-    expect(() => i18n.add(settingsZh)).toThrow(CliffDuplicateKeyError);
+    expect(() => i18n.add(settingsZh)).toThrow(CliffDuplicateEntryError);
   });
 
   it("reports a canonical CLIFF round trip", () => {

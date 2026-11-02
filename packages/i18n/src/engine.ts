@@ -10,25 +10,25 @@ import {
 } from "@cliff-format/core";
 import { createT } from "./builder.js";
 import { Catalog, type CatalogOptions } from "./catalog.js";
+import { assertScope, resolveEntryId } from "./entry-id.js";
 import { CliffI18nError, CliffScopeError } from "./errors.js";
 import type { IcuRuntime } from "./icu/types.js";
-import { assertScope, resolveKey } from "./key.js";
 import type {
   AddOptions,
   AddResult,
   CliffFile,
   CliffResource,
+  EntryIdInput,
   EntryQuery,
   FileOptions,
   I18n,
   I18nDiagnostic,
   I18nOptions,
   I18nRuntime,
-  KeyInput,
   MessageRecord,
   MissingBehavior,
   Params,
-  ResolvedKey,
+  ResolvedEntryId,
   ScopedI18n,
   StatusCounts,
   StatusTag,
@@ -50,7 +50,7 @@ export class I18nImpl implements I18n<string>, I18nRuntime {
 
   private readonly icu: IcuRuntime;
   private readonly fallbacks: string[];
-  private readonly strictKeys: boolean;
+  private readonly strictEntryIds: boolean;
   private readonly parseOptions: ParseOptions;
   private readonly onDiagnostic: ((diagnostic: I18nDiagnostic) => void) | undefined;
   private readonly maxDiagnostics: number;
@@ -74,11 +74,11 @@ export class I18nImpl implements I18n<string>, I18nRuntime {
     if (options.defaultGroup !== undefined) catalogOptions.defaultGroup = options.defaultGroup;
     this.catalog = new Catalog(catalogOptions);
     this.defaultParams = options.params ?? {};
-    this.missing = options.missing ?? "key";
+    this.missing = options.missing ?? "entryId";
     this.requireEmotion = options.requireEmotion ?? false;
     this.enforceMaxWidth = options.enforceMaxWidth ?? "warn";
     this.icu = options.icu ?? defaultIcu;
-    this.strictKeys = options.strictKeys ?? true;
+    this.strictEntryIds = options.strictEntryIds ?? true;
     this.parseOptions = options.parse ?? {};
     this.onDiagnostic = options.onDiagnostic;
     this.maxDiagnostics = options.maxDiagnostics ?? 1000;
@@ -176,14 +176,14 @@ export class I18nImpl implements I18n<string>, I18nRuntime {
     return this.add(document, options);
   }
 
-  resolve(key: KeyInput, scope: TranslationScope): ResolvedKey {
-    const resolved = resolveKey(key, scope, this.catalog, this.strictKeys);
+  resolve(entryId: EntryIdInput, scope: TranslationScope): ResolvedEntryId {
+    const resolved = resolveEntryId(entryId, scope, this.catalog, this.strictEntryIds);
     if (resolved.ambiguous === true) {
       this.diagnose({
-        code: "ambiguous-key",
+        code: "ambiguous-entry",
         severity: "warning",
-        message: `ambiguous key "${typeof key === "string" ? key : key.id}"; chose "${resolved.canonical}"`,
-        key: resolved.canonical,
+        message: `ambiguous entry "${typeof entryId === "string" ? entryId : entryId.id}"; chose "${resolved.canonical}"`,
+        entryId: resolved.canonical,
         locale: this.currentLocale,
         namespace: resolved.namespace,
         clan: resolved.clan,
@@ -201,13 +201,13 @@ export class I18nImpl implements I18n<string>, I18nRuntime {
     return this.catalog.selectRecord(canonical, chain, this.sourceLanguageValue);
   }
 
-  has(key: KeyInput, scope: TranslationScope): boolean {
-    const resolved = this.resolve(key, scope);
+  has(entryId: EntryIdInput, scope: TranslationScope): boolean {
+    const resolved = this.resolve(entryId, scope);
     return resolved.exists && this.recordFor(resolved.canonical, this.currentLocale) !== undefined;
   }
 
-  keys(scope: Partial<TranslationScope> = {}): string[] {
-    return this.catalog.keys(scope);
+  entryIds(scope: Partial<TranslationScope> = {}): string[] {
+    return this.catalog.entryIds(scope);
   }
 
   query(options: EntryQuery = {}): MessageRecord[] {
@@ -358,9 +358,9 @@ export class I18nImpl implements I18n<string>, I18nRuntime {
   }
 }
 
-export function createI18nEngine<Keys extends string = string>(
+export function createI18nEngine<EntryIds extends string = string>(
   options: I18nOptions,
   defaultIcu: IcuRuntime,
-): I18n<Keys> {
-  return new I18nImpl(options, defaultIcu) as unknown as I18n<Keys>;
+): I18n<EntryIds> {
+  return new I18nImpl(options, defaultIcu) as unknown as I18n<EntryIds>;
 }

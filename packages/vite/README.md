@@ -1,6 +1,6 @@
 # @cliff-format/vite
 
-Import `.cliff` files directly and generate typed canonical keys. The plugin embeds raw CLIFF text
+Import `.cliff` files directly and generate typed canonical entry IDs. The plugin embeds raw CLIFF text
 in the module graph; it does not convert documents to JSON.
 
 ## Install
@@ -18,7 +18,7 @@ export default defineConfig({
   plugins: [
     cliff({
       dirs: ["src/locales"],
-      dts: "src/cliff-keys.d.ts",
+      dts: "src/cliff-entry-ids.d.ts",
       virtualModule: "virtual:cliff",
     }),
   ],
@@ -29,7 +29,7 @@ export default defineConfig({
 
 ~~~ts
 import cliffText from "./locales/zh-CN/settings.cliff";
-import { filePath, namespace, clan, locale, keys } from "./locales/zh-CN/settings.cliff";
+import { filePath, namespace, clan, locale, entryIds } from "./locales/zh-CN/settings.cliff";
 ~~~
 
 The default export is the raw CLIFF string. Named exports are build metadata; they are not written
@@ -39,10 +39,10 @@ into CLIFF.
 
 ~~~ts
 import { resources, files } from "virtual:cliff";
-import type { CliffKey } from "virtual:cliff";
+import type { CliffEntryId } from "virtual:cliff";
 import { createI18n } from "@cliff-format/i18n";
 
-const i18n = createI18n<CliffKey>({
+const i18n = createI18n<CliffEntryId>({
   locale: "zh-CN",
   fallbackLocale: "en-US",
   resources,
@@ -50,7 +50,7 @@ const i18n = createI18n<CliffKey>({
 ~~~
 
 `resources` is an array of raw CLIFF strings. `files` carries `filePath`, `namespace`, `clan`,
-`locale` and canonical `keys` for each file.
+`locale` and canonical `entryIds` for each file.
 
 ## Type generation
 
@@ -59,7 +59,7 @@ declaration:
 
 ~~~ts
 declare module "virtual:cliff" {
-  export type CliffKey = "demo.settings.video.resolution";
+  export type CliffEntryId = "demo.settings.video.resolution";
   export interface CliffFileMeta { ... }
   export const resources: readonly string[];
   export const files: CliffFileMeta[];

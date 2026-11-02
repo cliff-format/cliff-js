@@ -5,19 +5,19 @@ import {
   hasErrors,
   validateDocument,
 } from "@cliff-format/core";
-import { CliffI18nError, CliffMissingKeyError, CliffMissingMetadataError } from "./errors.js";
+import { CliffI18nError, CliffMissingEntryError, CliffMissingMetadataError } from "./errors.js";
 import { reconcileEntryStatus } from "./status.js";
 import type {
   CommitOptions,
   EmotionTag,
+  EntryIdInput,
   I18nRuntime,
-  KeyInput,
   MessageBuilder,
   MessageMetadata,
   MessagePart,
   MessageRecord,
   Params,
-  ResolvedKey,
+  ResolvedEntryId,
   StatusTag,
   TFunction,
   TranslationScope,
@@ -62,7 +62,7 @@ export class MessageBuilderImpl {
   constructor(
     private readonly i18n: I18nRuntime,
     private readonly scope: TranslationScope,
-    private readonly keyInput: KeyInput,
+    private readonly entryIdInput: EntryIdInput,
   ) {}
 
   source(text: string, params: Params = {}): MessageBuilderImpl {
@@ -117,11 +117,11 @@ export class MessageBuilderImpl {
     return this;
   }
 
-  extension(key: string, value: string): MessageBuilderImpl {
-    if (!key.startsWith("x-")) {
-      throw new TypeError(`extension key "${key}" must start with "x-"`);
+  extension(name: string, value: string): MessageBuilderImpl {
+    if (!name.startsWith("x-")) {
+      throw new TypeError(`extension name "${name}" must start with "x-"`);
     }
-    this.extensionMap[key] = value;
+    this.extensionMap[name] = value;
     return this;
   }
 
@@ -155,11 +155,11 @@ export class MessageBuilderImpl {
     return this.localeOverride ?? this.i18n.getLocale();
   }
 
-  private resolved(): ResolvedKey {
-    return this.i18n.resolve(this.keyInput, this.scope);
+  private resolved(): ResolvedEntryId {
+    return this.i18n.resolve(this.entryIdInput, this.scope);
   }
 
-  private recordFor(resolved: ResolvedKey): MessageRecord | undefined {
+  private recordFor(resolved: ResolvedEntryId): MessageRecord | undefined {
     return this.i18n.recordFor(resolved.canonical, this.activeLocale());
   }
 
@@ -177,13 +177,13 @@ export class MessageBuilderImpl {
     code: string,
     severity: "error" | "warning" | "info",
     message: string,
-    resolved?: ResolvedKey,
+    resolved?: ResolvedEntryId,
   ): void {
     this.i18n.diagnose({
       code,
       severity,
       message,
-      ...(resolved === undefined ? {} : { key: resolved.canonical }),
+      ...(resolved === undefined ? {} : { entryId: resolved.canonical }),
       locale: this.activeLocale(),
       namespace: this.scope.namespace,
       clan: this.scope.clan,
@@ -191,7 +191,7 @@ export class MessageBuilderImpl {
     });
   }
 
-  private requireEffectiveType(resolved: ResolvedKey): string | undefined {
+  private requireEffectiveType(resolved: ResolvedEntryId): string | undefined {
     if (this.typeTag !== undefined) return this.typeTag;
     if (!this.inheritType) return undefined;
     const group = this.i18n
@@ -207,7 +207,7 @@ export class MessageBuilderImpl {
     return group.type;
   }
 
-  private ensureAuthoringMetadata(resolved: ResolvedKey): void {
+  private ensureAuthoringMetadata(resolved: ResolvedEntryId): void {
     if (this.sourceText === undefined) return;
     if (this.typeTag !== undefined) return;
     if (this.inheritType) {
@@ -221,7 +221,7 @@ export class MessageBuilderImpl {
     );
   }
 
-  private groupEmotion(resolved: ResolvedKey): string[] {
+  private groupEmotion(resolved: ResolvedEntryId): string[] {
     const group = this.i18n
       .getCatalog()
       .findGroup(resolved.namespace, resolved.clan, resolved.group);
@@ -229,7 +229,7 @@ export class MessageBuilderImpl {
   }
 
   private requireEmotionIfConfigured(
-    resolved: ResolvedKey,
+    resolved: ResolvedEntryId,
     effectiveType: string | undefined,
   ): void {
     const requirement = this.i18n.requireEmotion;
@@ -253,7 +253,7 @@ export class MessageBuilderImpl {
     }
   }
 
-  private createDraft(resolved: ResolvedKey): MessageRecord {
+  private createDraft(resolved: ResolvedEntryId): MessageRecord {
     const sourceLanguage = this.i18n.getSourceLanguage();
     const targetLanguage = this.activeLocale();
     const effectiveType = this.requireEffectiveType(resolved);
@@ -293,7 +293,12 @@ export class MessageBuilderImpl {
     return record;
   }
 
-  private checkWidth(text: string, maxWidth: number, resolved: ResolvedKey, locale: string): void {
+  private checkWidth(
+    text: string,
+    maxWidth: number,
+    resolved: ResolvedEntryId,
+    locale: string,
+  ): void {
     const policy = this.i18n.enforceMaxWidth;
     if (policy === "off") return;
     const cells = displayWidth(text);
@@ -308,19 +313,19 @@ export class MessageBuilderImpl {
 
   private renderRecord(
     record: MessageRecord,
-    resolved: ResolvedKey,
+    resolved: ResolvedEntryId,
     params: Params | undefined,
     parts: false,
   ): string;
   private renderRecord(
     record: MessageRecord,
-    resolved: ResolvedKey,
+    resolved: ResolvedEntryId,
     params: Params | undefined,
     parts: true,
   ): MessagePart[];
   private renderRecord(
     record: MessageRecord,
-    resolved: ResolvedKey,
+    resolved: ResolvedEntryId,
     params: Params | undefined,
     parts: boolean,
   ): string | MessagePart[] {
@@ -345,7 +350,7 @@ export class MessageBuilderImpl {
     return text;
   }
 
-  private expectationDiagnostics(record: MessageRecord, resolved: ResolvedKey): void {
+  private expectationDiagnostics(record: MessageRecord, resolved: ResolvedEntryId): void {
     if (this.sourceText !== undefined && this.sourceText !== record.source) {
       this.diagnose(
         "source-mismatch",
@@ -372,16 +377,16 @@ export class MessageBuilderImpl {
     }
   }
 
-  private missing(resolved: ResolvedKey): string {
+  private missing(resolved: ResolvedEntryId): string {
     const message = `missing CLIFF entry "${resolved.canonical}" for locale "${this.activeLocale()}"`;
-    this.diagnose("missing-key", "warning", message, resolved);
+    this.diagnose("missing-entry", "warning", message, resolved);
     const behavior = this.i18n.missing;
     if (behavior === "throw") {
-      throw new CliffMissingKeyError(resolved.canonical, this.activeLocale());
+      throw new CliffMissingEntryError(resolved.canonical, this.activeLocale());
     }
     if (behavior === "empty") return "";
     if (behavior === "source") return this.sourceText ?? "";
-    if (typeof this.keyInput === "string") return this.keyInput;
+    if (typeof this.entryIdInput === "string") return this.entryIdInput;
     return resolved.canonical;
   }
 
@@ -436,7 +441,7 @@ export class MessageBuilderImpl {
       this.referencePaths.length > 0 ? [...this.referencePaths] : (record?.reference ?? []);
     const reviewer = this.reviewerName ?? record?.reviewer;
     return {
-      key: resolved.canonical,
+      entryId: resolved.canonical,
       namespace: resolved.namespace,
       clan: resolved.clan,
       group: resolved.group,
@@ -536,31 +541,31 @@ export class MessageBuilderImpl {
   }
 }
 
-export function createT<Keys extends string = string>(
+export function createT<EntryIds extends string = string>(
   i18n: I18nRuntime,
   scope: TranslationScope,
-): TFunction<Keys> {
-  const callable = (key: KeyInput, params?: Params): MessageBuilder | string => {
-    const builder = new MessageBuilderImpl(i18n, scope, key);
+): TFunction<EntryIds> {
+  const callable = (entryId: EntryIdInput, params?: Params): MessageBuilder | string => {
+    const builder = new MessageBuilderImpl(i18n, scope, entryId);
     if (params === undefined) {
       return builder as unknown as MessageBuilder;
     }
     return builder.params(params).render();
   };
 
-  const fn = callable as unknown as TFunction<Keys>;
-  fn.render = (key, params) => new MessageBuilderImpl(i18n, scope, key).render(params);
-  fn.renderToParts = (key, params) =>
-    new MessageBuilderImpl(i18n, scope, key).renderToParts(params);
-  fn.has = (key) => {
-    const resolved = i18n.resolve(key, scope);
+  const fn = callable as unknown as TFunction<EntryIds>;
+  fn.render = (entryId, params) => new MessageBuilderImpl(i18n, scope, entryId).render(params);
+  fn.renderToParts = (entryId, params) =>
+    new MessageBuilderImpl(i18n, scope, entryId).renderToParts(params);
+  fn.has = (entryId) => {
+    const resolved = i18n.resolve(entryId, scope);
     return resolved.exists && i18n.recordFor(resolved.canonical, i18n.getLocale()) !== undefined;
   };
-  fn.entry = (key) => {
-    const resolved = i18n.resolve(key, scope);
+  fn.entry = (entryId) => {
+    const resolved = i18n.resolve(entryId, scope);
     return i18n.recordFor(resolved.canonical, i18n.getLocale())?.entry;
   };
-  fn.meta = (key) => new MessageBuilderImpl(i18n, scope, key).meta();
-  fn.keys = () => i18n.getCatalog().keys(scope);
+  fn.meta = (entryId) => new MessageBuilderImpl(i18n, scope, entryId).meta();
+  fn.entryIds = () => i18n.getCatalog().entryIds(scope);
   return fn;
 }

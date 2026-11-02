@@ -61,13 +61,13 @@ afterEach(async () => {
 });
 
 describe("CLIFF Vite plugin", () => {
-  it("scans CLIFF files and extracts canonical keys", async () => {
+  it("scans CLIFF files and extracts canonical entry IDs", async () => {
     const root = await fixture();
-    const options = resolveCliffOptions({ root, dts: "src/cliff-keys.d.ts" }, root);
+    const options = resolveCliffOptions({ root, dts: "src/cliff-entry-ids.d.ts" }, root);
     const files = await scanCliffFiles(options);
     expect(files).toHaveLength(2);
     expect(files[0]?.filePath).toBe("src/locales/en-US/settings.cliff");
-    expect(files[0]?.keys).toEqual(["demo.settings.video.resolution"]);
+    expect(files[0]?.entryIds).toEqual(["demo.settings.video.resolution"]);
     expect(files[0]?.namespace).toBe("demo");
     expect(files[0]?.locale).toBe("en-US");
   });
@@ -86,15 +86,15 @@ describe("CLIFF Vite plugin", () => {
 
   it("generates an ambient module declaration and writes it", async () => {
     const root = await fixture();
-    const options = resolveCliffOptions({ root, dts: "types/cliff-keys.d.ts" }, root);
+    const options = resolveCliffOptions({ root, dts: "types/cliff-entry-ids.d.ts" }, root);
     const files = await scanCliffFiles(options);
     const dts = generateDts(files, "virtual:cliff");
     expect(dts).toContain('declare module "virtual:cliff"');
-    expect(dts).toContain('export type CliffKey = "demo.settings.video.resolution";');
+    expect(dts).toContain('export type CliffEntryId = "demo.settings.video.resolution";');
     expect(dts).toContain("export const resources: readonly string[];");
     expect(dts).toContain('declare module "*.cliff"');
     await writeDts(files, options);
-    const written = await readFile(join(root, "types", "cliff-keys.d.ts"), "utf8");
+    const written = await readFile(join(root, "types", "cliff-entry-ids.d.ts"), "utf8");
     expect(written).toBe(dts);
   });
 
@@ -105,12 +105,12 @@ describe("CLIFF Vite plugin", () => {
     expect(result.code).toContain("const cliff = ");
     expect(result.code).toContain("export { cliff as default, file };");
     expect(result.code).toContain('"namespace":"demo"');
-    expect(result.code).toContain('"keys":["demo.settings.video.resolution"]');
+    expect(result.code).toContain('"entryIds":["demo.settings.video.resolution"]');
   });
 
   it("provides transform, virtual load and build start hooks", async () => {
     const root = await fixture();
-    const plugin = cliff({ root, dirs: ["src/locales"], dts: "types/cliff-keys.d.ts" });
+    const plugin = cliff({ root, dirs: ["src/locales"], dts: "types/cliff-entry-ids.d.ts" });
     const addWatchFile = vi.fn();
     await callHook(plugin.buildStart as UnknownHook | undefined, { addWatchFile });
     expect(addWatchFile).toHaveBeenCalled();

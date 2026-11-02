@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | `@cliff-format/core` | model, parser, serializer, validator, identifiers, width, layout | none |
 | `@cliff-format/json` | CLIFF-shaped, flat and nested JSON conversion | peer `@cliff-format/core` |
-| `@cliff-format/i18n` | CLIFF runtime catalog, key resolution, `t()` builder, ICU, diagnostics | peer `@cliff-format/core`; `messageformat`, `@messageformat/icu-messageformat-1`; optional peer React |
+| `@cliff-format/i18n` | CLIFF runtime catalog, entry ID resolution, `t()` builder, ICU, diagnostics | peer `@cliff-format/core`; `messageformat`, `@messageformat/icu-messageformat-1`; optional peer React |
 | `@cliff-format/translate` | DeepSeek client, CLIFF prompt and tolerant response merge | peer `@cliff-format/core` |
 | `@cliff-format/vite` | `.cliff` module transform, `virtual:cliff`, type generation, HMR | peer `@cliff-format/core`, `vite` |
 
@@ -31,7 +31,7 @@ string / Uint8Array
         |
         +──> @cliff-format/json ──> CLIFF-shaped / flat / nested JSON
         |
-        +──> @cliff-format/i18n catalog ──> key resolution ──> t() ──> ICU ──> string | parts
+        +──> @cliff-format/i18n catalog ──> entry ID resolution ──> t() ──> ICU ──> string | parts
         |
         +──> @cliff-format/translate ──> DeepSeek ──> CLIFF ──> parse/validate/merge
 ```
@@ -62,7 +62,7 @@ JSON.
 - `CliffModelError` — a malformed model or JSON object.
 - `UnsupportedSpecVersion` — a CLIFF version this build does not implement.
 - `CliffError` — base class.
-- `CliffScopeError`, `CliffScopeMismatchError`, `CliffMissingKeyError`, `CliffAmbiguousKeyError`, `CliffDuplicateKeyError`, `CliffMissingMetadataError`, `CliffIcuError` — runtime localization errors.
+- `CliffScopeError`, `CliffScopeMismatchError`, `CliffMissingEntryError`, `CliffAmbiguousEntryError`, `CliffDuplicateEntryError`, `CliffMissingMetadataError`, `CliffIcuError` — runtime localization errors.
 - `DeepSeekConfigError`, `DeepSeekHttpError`, `TranslationParseError`, `TranslationValidationError` — translation errors.
 
 ## Versioning

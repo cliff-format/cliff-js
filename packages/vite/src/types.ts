@@ -15,7 +15,7 @@ export interface CliffFileMeta {
   namespace: string;
   clan: string;
   locale: string;
-  keys: readonly string[];
+  entryIds: readonly string[];
 }
 
 export interface ScannedCliffFile extends CliffFileMeta {
