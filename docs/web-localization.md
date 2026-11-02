@@ -5,6 +5,20 @@ why the API looks the way it does, how keys are resolved, and which CLIFF guaran
 preserves. It is the design record for `@cliff-format/i18n`, `@cliff-format/translate` and
 `@cliff-format/vite`.
 
+## 0. Terms
+
+CLIFF is **not a key-value catalog**. A CLIFF document is a header, a set of group sections, and a
+set of entries:
+
+- an **entry** is the translation unit: an `<id>` marker followed by fields;
+- the **entry ID** is not a field; the marker names the entry;
+- the **canonical ID** is `namespace.clan.group-path.entry-id`;
+- a **field** is a `key: value` line inside the header, a group, or an entry. `key: value` is
+  field syntax, not the document's data model.
+
+The argument to `t("...")` is a runtime lookup key. It resolves to a canonical entry ID or a
+scoped short form of one; it is not a JSON property and not a CLIFF field name.
+
 ## 1. One working format
 
 CLIFF is the working format for extraction, translation, review, delivery and runtime. The web

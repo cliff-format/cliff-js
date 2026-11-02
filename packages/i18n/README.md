@@ -42,6 +42,15 @@ does not hide defaults:
 i18n.scope({ namespace: "demo" });
 ~~~
 
+## Entries, not key-value pairs
+
+CLIFF is a document of groups and entries, not a flat key-value map. An entry is an `<id>` marker
+plus fields such as `source`, `target`, `type` and `status`. The canonical ID is
+`namespace.clan.group-path.entry-id`.
+
+The argument to `t("...")` is a runtime lookup key. It resolves to that entry ID, or to a scoped
+short form of it. `key: value` in a CLIFF file is field syntax; it is not the format's data model.
+
 ## Key syntax
 
 Every input form resolves to a CLIFF canonical ID. None of them is a fuzzy match.
