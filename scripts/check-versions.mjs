@@ -16,15 +16,13 @@ for (const name of readdirSync(packagesRoot)) {
   }
   if (manifest.private === true) continue;
   if (manifest.version !== version) {
-    failures.push(`${manifest.name}: version ${manifest.version} != root ${version}`);
+    failures.push(manifest.name + ": version " + manifest.version + " != root " + version);
   }
-  if (manifest.name === "@cliff-format/json") {
-    const peer = manifest.peerDependencies?.["@cliff-format/core"];
-    if (peer !== `^${version}`) {
-      failures.push(
-        `@cliff-format/json: peer @cliff-format/core is ${peer ?? "missing"}, expected ^${version}`,
-      );
-    }
+  const corePeer = manifest.peerDependencies?.["@cliff-format/core"];
+  if (corePeer !== undefined && corePeer !== "^" + version) {
+    failures.push(
+      manifest.name + ": peer @cliff-format/core is " + corePeer + ", expected ^" + version,
+    );
   }
 }
 
@@ -32,4 +30,4 @@ if (failures.length > 0) {
   for (const failure of failures) console.error(failure);
   process.exit(1);
 }
-console.log(`versions synchronized at ${version}`);
+console.log("versions synchronized at " + version);

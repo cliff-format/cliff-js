@@ -12,17 +12,17 @@ validateDocument(document: CliffDocument, options?: ValidateDocumentOptions): Va
 serialize(document: CliffDocument, options?: { version?: "1.0" | "1.1" }): string
 ```
 
-`parse` throws `CliffParseError` for syntax or structural errors. It does not check required fields, vocabularies, ICU balance, duplicate IDs, layout or width.
+`parse` checks syntax and structure and throws `CliffParseError` on failure. Call `validate` for required fields, vocabularies, ICU balance, duplicate IDs, layout and width.
 
 `parseTolerant` applies the Appendix C repairs, records every correction and validates the repaired document. It throws `CliffValidationError` when hard errors remain.
 
-`validate` never throws for invalid CLIFF content; it returns issues. It accepts `tolerant`, `checkWidth`, `checkLayout`, `style` and `onIdCollision`.
+`validate` returns issues for invalid content and accepts `tolerant`, `checkWidth`, `checkLayout`, `style` and `onIdCollision`.
 
-`serialize` does not validate. It throws `CliffModelError` when a string cannot be represented.
+Call `validate` before `serialize`. `serialize` throws `CliffModelError` when a string cannot be represented.
 
 ### Model
 
-`CliffDocument` contains `specVersion`, `header`, `groups`, an optional `path` and `corrections`. `CliffHeader`, `CliffGroup` and `CliffEntry` use camelCase property names; JSON interchange uses kebab-case field names.
+`CliffDocument` contains `specVersion`, `header`, `groups`, an optional `path` and `corrections`. `path` is non-serialized runtime metadata for file-layout warnings. `CliffGroup.path` stores the group path. `CliffHeader`, `CliffGroup` and `CliffEntry` use camelCase property names; JSON interchange uses kebab-case field names.
 
 Each group and entry carries a 1-based `line`. Hand-built models use `line: 0`.
 
@@ -97,6 +97,125 @@ Flat/nested output is lossy and only carries keys and values. Import options req
 
 See the [JSON package README](../packages/json/README.md) for the complete options.
 
+## @cliff-format/i18n
+
+```ts
+createI18n(options: I18nOptions): I18n
+
+i18n.scope({ namespace, clan, group? }): { t, scope }
+i18n.add(resource, options?): AddResult
+i18n.addDocument(document, options?): AddResult
+i18n.files(options?): CliffFile[]
+i18n.toCliff(options?): string
+i18n.setLocale(locale) / changeLanguage(locale)
+i18n.subscribe(listener): () => void
+i18n.format(message, params?, options?) / formatToParts(...)
+i18n.validate() / diagnostics()
+i18n.query(options?) / untranslated(options?) / byStatus(status, options?)
+i18n.statusCounts(options?)
+```
+
+### Status and query
+
+```ts
+interface EntryQuery {
+  namespace?: string;
+  clan?: string;
+  group?: string;
+  locale?: string | "all";
+  status?: StatusTag | readonly StatusTag[];
+  target?: "any" | "present" | "missing";
+}
+
+type StatusCounts = Record<StatusTag, number>;
+```
+
+Writes reconcile status automatically: a target added to an initial entry, a reworked
+reviewed/final target and a changed source all return `translated`; an explicit `.status()`
+wins; a missing target means `initial`. The library never auto-promotes to `reviewed` or
+`final`.
+
+`untranslated()` returns entries with no target or status `initial`. `byStatus()` filters a
+single status; `query()` accepts several statuses and target presence. `locale` defaults to
+`"all"`.
+
+### Fixed vocabularies
+
+`TYPE`, `EMOTION`, `STATUS` and `VARIANT` are exported as enum-like const objects with
+matching literal types. Guards `isTypeTag`, `isEmotionTag`, `isStatusTag`, `isVariantTag`
+and the transition helper `canTransitionStatus` are exported from the same entry. Core also
+exports the underlying `TYPE_TAGS`, `EMOTION_TAGS`, `STATUS_TAGS` and `VARIANT_TAGS` sets.
+
+`namespace` and `clan` are required by `TranslationScope`. Pass both to every scope; get `t` from
+`i18n.scope()` or the React hook.
+
+The full entry uses `messageformat` for MF2 and `@messageformat/icu-messageformat-1` for MF1.
+`@cliff-format/i18n/lite` excludes those dependencies. `@cliff-format/i18n/react` exports
+`I18nProvider`, `useI18n` and `useTranslation`.
+
+### Entry ID input
+
+```ts
+type EntryIdInput =
+  | string
+  | { namespace?: string; clan?: string; group?: string; id: string };
+```
+
+Strings accept `namespace:clan.group.id`, `namespace.clan.group.id`,
+`namespace/clan/group/id`, scoped short entry IDs and unique IDs. Ambiguity throws
+`CliffAmbiguousEntryError`; a full entry ID outside the scope throws `CliffScopeMismatchError`.
+
+### Builder
+
+```ts
+t("home.title")                  // MessageBuilder<{ source: false; type: false }>
+t("home.title", params)          // string
+t("home.title").render()         // lookup
+t("home.title").source("Text")   // authoring; render is never until type is supplied
+  .type(TYPE.label)              // A
+  .typeFromGroup()               // B: explicit group inheritance
+  .emotion(EMOTION.objective)
+  .render();
+```
+
+Drafts are created on `render()` / `commit()` and exported by `toCliff()`. `source`,
+effective `type` and `status` are enforced. `emotion` is optional by CLIFF and derives from
+`type`; `requireEmotion` can tighten the project rule.
+
+### Diagnostics
+
+`missing-entry`, `ambiguous-entry`, `type-mismatch`, `emotion-mismatch`, `source-mismatch`,
+`width-exceeded`, `icu-error`, `draft-created`, `fallback-used` and related codes are delivered
+through `onDiagnostic` and `diagnostics()`.
+
+## @cliff-format/translate
+
+```ts
+createDeepSeekTranslator(options): DeepSeekTranslator
+translator.complete(messages, options?): Promise<DeepSeekCompletion>
+translator.translate(cliffSource, options?): Promise<TranslationResult>
+translator.translateDocument(document, options?): Promise<TranslationResult>
+```
+
+Defaults: `baseUrl: "https://api.deepseek.com"`, `model: "deepseek-flash"`,
+`temperature: 1.3`, `thinking: "off"` (sent as `{"thinking":{"type":"disabled"}}`), `topP: 1`,
+`maxTokens: 8192`, `timeoutMs: 180000`, `maxRetries: 2`.
+
+The prompt contains CLIFF only. Responses are parsed with `parseTolerant`, validated, and merged by
+canonical ID; only `target` and `status` are copied. `reviewed`/`final` entries are preserved
+unless `overwrite: "all"`. See the [translate package README](../packages/translate/README.md).
+
+## @cliff-format/vite
+
+```ts
+cliff(options?): Plugin
+```
+
+Transforms `.cliff` into a module whose default export is the raw CLIFF string, generates
+`virtual:cliff` resources and an ambient `CliffCanonicalId` union. Options: `dirs`, `include`,
+`exclude`, `virtualModule`, `dts`, `typegen`, `reloadOnChange`. See the
+[Vite package README](../packages/vite/README.md).
+
 ## Errors
 
 - `CliffError`
@@ -105,3 +224,5 @@ See the [JSON package README](../packages/json/README.md) for the complete optio
 - `UnsupportedSpecVersion` (`declared`, `supported`)
 - `CliffLimitError` (`limit`, `observed`)
 - `CliffModelError`
+- `CliffScopeError`, `CliffScopeMismatchError`, `CliffMissingEntryError`, `CliffAmbiguousEntryError`, `CliffDuplicateEntryError`, `CliffMissingMetadataError`, `CliffIcuError`
+- `DeepSeekConfigError`, `DeepSeekHttpError`, `TranslationParseError`, `TranslationValidationError`

@@ -14,22 +14,22 @@
   <a href="https://github.com/cliff-format/cliff/blob/main/spec/cliff-1.1.0.md"><img alt="CLIFF 1.0 | 1.1" src="https://img.shields.io/badge/CLIFF-1.0%20%7C%201.1-2ea043"></a>
   <img alt="Node.js 22+" src="https://img.shields.io/badge/node-%E2%89%A522-339933">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-2ea043"></a>
-  <img alt="Version 0.1.0" src="https://img.shields.io/badge/version-0.1.0-blue">
+  <img alt="Version 0.2.0" src="https://img.shields.io/badge/version-0.2.0-blue">
 </p>
 
 ---
 
-CLIFF keeps translation context — namespace, clan, group path, entry id, type, emotion,
+CLIFF keeps translation context — namespace, clan, group path, entry ID, type, emotion,
 width — next to every string, in a line-oriented format that stays cheap for translators and
 LLMs alike. **cliff-js** is the JavaScript and TypeScript implementation of that format: a typed
-data model, a strict parser, a tolerant parser, a canonical serializer, a validator, and JSON
-converters for browser and Node.js pipelines.
+data model, a strict parser, a tolerant parser, a canonical serializer, a validator, JSON
+converters, a CLIFF-native web runtime, a DeepSeek translation client and a Vite plugin.
 
 | | |
 | --- | --- |
 | **Parse** | Strict mode rejects exactly what the grammar rejects; tolerant mode applies the seven documented repairs of Appendix C and reports each one. |
 | **Serialize** | Canonical output that round-trips, preserving the specification version the document declared. |
-| **Validate** | Required fields, closed vocabularies, status rules, duplicate ids, ICU brace balance, layout, display width, and style. |
+| **Validate** | Required fields, closed vocabularies, status rules, duplicate IDs, ICU brace balance, layout, display width, and style. |
 | **Convert** | Lossless CLIFF-shaped JSON, plus flat and nested JSON for runtime resources. |
 | **Typed and browser-first** | ESM, CommonJS and .d.ts from one source; no runtime dependencies and no Node built-ins in the browser entry points. |
 
@@ -42,6 +42,9 @@ and 1.1, plus the [cliff-test](https://github.com/cliff-format/cliff-test) confo
 | --- | --- |
 | [`@cliff-format/core`](packages/core/README.md) | Data model, strict and tolerant parser, canonical serializer, validator |
 | [`@cliff-format/json`](packages/json/README.md) | CLIFF-shaped, flat and nested JSON conversion |
+| [`@cliff-format/i18n`](packages/i18n/README.md) | CLIFF-native runtime, `t()` builder, ICU and React adapter |
+| [`@cliff-format/translate`](packages/translate/README.md) | DeepSeek translation with CLIFF input and output |
+| [`@cliff-format/vite`](packages/vite/README.md) | `.cliff` imports, `virtual:cliff` and typed entry IDs |
 
 The core package contains no Node built-ins and no runtime dependencies. `@cliff-format/json`
 declares `@cliff-format/core` as a peer dependency.
@@ -97,7 +100,7 @@ for (const issue of validate(text)) {
 ~~~
 
 `parse` is the strict syntax and structure parser. It does not enforce required fields,
-vocabularies, ICU balance, duplicate ids, layout or width. `validate` is the full semantic gate
+vocabularies, ICU balance, duplicate IDs, layout or width. `validate` is the full semantic gate
 and returns diagnostics instead of throwing for invalid CLIFF content.
 
 ## Strict and tolerant parsing
@@ -120,7 +123,7 @@ is the default; the mode is never chosen for you.
 | C.2.1 bare scalar in a list-typed field | `emotion: objective` | `["objective"]` |
 | C.2.2 repeated field in one scope | two `target:` lines | concatenated / appended in order |
 | C.2.3 quoted tag | `status: "final"` | `final` |
-| C.2.4 quoted entry id | `<"resolution">` | `resolution` |
+| C.2.4 quoted entry ID | `<"resolution">` | `resolution` |
 | C.2.5 identifier with a reserved character | `<Save & Load>` | `Save-Load` (+ collision handling) |
 | C.2.6 version-line spelling | `cliff 1.1.0` | `CLIFF 1.1` |
 | C.2.7 quoted key | `"context": "…"` | `context: "…"` |
@@ -200,8 +203,57 @@ those matter.
 | Nested JSON | key/value only |
 
 Import options include `valueRole`, `entryType`, `entryStatus` and `keySeparator`.
-i18next plural, context and namespace semantics belong to the future `@cliff-format/i18n`
-package. See the [JSON package README](packages/json/README.md) for the complete option list.
+See the [JSON package README](packages/json/README.md) for the complete option list.
+
+## Web localization
+
+`@cliff-format/i18n` reads and writes CLIFF directly. A scope is mandatory because CLIFF requires
+namespace and clan:
+
+~~~ts
+import { createI18n, TYPE, EMOTION } from "@cliff-format/i18n";
+
+const i18n = createI18n({
+  locale: "zh-CN",
+  fallbackLocale: "en-US",
+  resources: [cliffText],
+});
+
+const { t } = i18n.scope({ namespace: "demo", clan: "settings", group: "video" });
+
+const label = t("resolution").render();
+const authored = t("contrast")
+  .source("Contrast")
+  .type(TYPE.noun)
+  .emotion(EMOTION.objective)
+  .render();
+~~~
+
+Calling `.source()` enters authoring mode; `render()` and `commit()` are compile-time unavailable
+until `.type()` or `.typeFromGroup()` supplies the required CLIFF type. Lookup mode reads the
+metadata from CLIFF. A draft is a real `status: initial` entry exported by `toCliff()`.
+
+The main entry uses `messageformat` for MF2 and `@messageformat/icu-messageformat-1` for MF1. Use
+`@cliff-format/i18n/lite` to omit the ICU runtime, and `@cliff-format/i18n/react` for
+`useTranslation()`.
+
+DeepSeek translation exchanges CLIFF only:
+
+~~~ts
+import { createDeepSeekTranslator } from "@cliff-format/translate";
+
+const translator = createDeepSeekTranslator({
+  apiKey: process.env.DEEPSEEK_API_KEY,
+  model: "deepseek-flash",
+  temperature: 1.3,
+  thinking: "off",
+});
+
+const result = await translator.translate(cliffText, { targetLanguage: "zh-CN" });
+~~~
+
+See [docs/web-localization.md](docs/web-localization.md) for the entry ID grammar, builder states and
+runtime design.
 
 ## API
 
@@ -214,7 +266,7 @@ package. See the [JSON package README](packages/json/README.md) for the complete
 | `serialize(document, options?)` | Canonical CLIFF output. |
 | `displayWidth(text)` | Rendered display width under UAX #11, with grapheme clustering. |
 | `effectiveContext / effectiveType / effectiveEmotion / effectiveMaxWidth` | Resolve a group-inherited value for one entry. |
-| `canonicalId / isName / isTag / normalizeIdentifier` | Identifier rules and canonical ids. |
+| `canonicalId / isName / isTag / normalizeIdentifier` | Identifier rules and canonical IDs. |
 | `toCliJson / fromCliJson / toJsonString / fromJsonString` | Lossless CLIFF-shaped JSON. |
 | `fromFlatJson / toFlatJson / fromNestedJson / toNestedJson` | Runtime-resource JSON views. |
 
@@ -247,8 +299,8 @@ in strict and tolerant mode alike.
 
 ## Browser usage
 
-The root entry points use only standard JavaScript, `TextEncoder`/`TextDecoder` and `Intl` APIs.
-They do not import Node built-ins.
+The browser entry points use only standard JavaScript, `TextEncoder`/`TextDecoder`, `fetch` and
+`Intl` APIs. They do not import Node built-ins; the Vite plugin is Node-only.
 
 ~~~ts
 const bytes = new Uint8Array(await file.arrayBuffer());
@@ -265,7 +317,10 @@ packages can run in a module worker. See [docs/browser.md](docs/browser.md).
 cliff-js/
 ├── packages/
 │   ├── core/          # @cliff-format/core
-│   └── json/          # @cliff-format/json
+│   ├── json/          # @cliff-format/json
+│   ├── i18n/          # @cliff-format/i18n
+│   ├── translate/     # @cliff-format/translate
+│   └── vite/          # @cliff-format/vite
 ├── fixtures/upstream/ # specification examples and conformance fixtures
 ├── docs/              # architecture, API, conformance, security, VCS policy
 ├── browser/           # Playwright browser smoke test
@@ -273,8 +328,8 @@ cliff-js/
 └── .github/workflows/ # CI, VCS and release workflows
 ~~~
 
-The core package has no runtime dependencies. Future CLI, i18n, AI, build-plugin and other
-format-converter packages will live beside it and depend on the core public API.
+The core package has no runtime dependencies. i18n, translation and build-plugin packages live
+beside it and depend on the core public API.
 
 ## Development
 
@@ -299,6 +354,7 @@ started manually from the Actions tab.
 - [CLIFF ABNF](https://github.com/cliff-format/cliff/blob/main/spec/abnf/cliff-1.1.abnf)
 - [Conformance fixtures](https://github.com/cliff-format/cliff-test/tree/main/tests/fixtures)
 - [Conformance notes](docs/conformance.md)
+- [Web localization design](docs/web-localization.md)
 - [Changelog](CHANGELOG.md)
 - [Contributing](CONTRIBUTING.md)
 - [Issues](https://github.com/cliff-format/cliff-js/issues)

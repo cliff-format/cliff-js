@@ -4,6 +4,38 @@ All notable changes to the CLIFF JavaScript packages are recorded here. Each ver
 features that changed behaviour, the packaging and documentation work around them, and the notes
 that matter to people building against the library.
 
+## 0.2.0 — 2026-11-02
+
+### New Features
+
+- Added `@cliff-format/i18n`, a CLIFF-native web runtime with a scoped `t()` builder, canonical entry ID
+  resolution, locale fallback, a compile-time source/type state machine, diagnostics and React
+  bindings.
+- Added full ICU support: MessageFormat 2 through `messageformat`, and MessageFormat 1 through
+  `@messageformat/icu-messageformat-1`, with `format()`, `formatToParts()`, markup parts and an
+  opt-out `@cliff-format/i18n/lite` entry.
+- Added `@cliff-format/translate`, a server/build-side DeepSeek client that sends and receives
+  CLIFF only. Defaults are `deepseek-flash`, temperature 1.3 and disabled thinking; responses are
+  parsed tolerantly and merged by canonical entry ID.
+- Added `@cliff-format/vite`, which imports `.cliff` files as raw CLIFF modules, generates
+  `virtual:cliff` resources and an ambient `CliffCanonicalId` union, and refreshes both on HMR.
+- Added status queries and enum-like vocabulary exports: `query()`, `untranslated()`,
+  `byStatus()`, `statusCounts()`, `STATUS`, `VARIANT`, vocabulary guards and
+  `canTransitionStatus()`. Writes now reconcile `initial`/`translated`/review invalidation
+  without requiring manual status bookkeeping.
+- Added `docs/web-localization.md` and package READMEs for the new packages.
+
+### Other Changes
+
+- Released the web packages together. `@cliff-format/core` and `@cliff-format/json` keep
+  their 0.1.0 behavior; all packages share the 0.2.0 version.
+- Renamed runtime key-facing APIs to entry IDs: the generated union is `CliffCanonicalId`, input is
+  `EntryIdInput`, resolution returns `ResolvedEntryId`, error classes use `*EntryError`, and
+  collection methods are `entryIds()`. The `missing` option value `"key"` is now `"entryId"`.
+- Added package-boundary, version, browser-bundle, publint and Are the Types Wrong checks for the
+  new packages.
+- Updated the root README, architecture, API, browser and conformance documentation.
+
 ## 0.1.0 — 2026-10-22
 
 First public release.
@@ -16,11 +48,11 @@ First public release.
   case-sensitive and never rewritten, tags stay in their closed vocabularies, terminators are
   accepted but never re-emitted, layout stays a warning, and resource limits are enforced.
 - Added tolerant parsing with the seven relaxations of specification Appendix C, and a per-repair
-  report covering list shape, repeated fields, quoted tags, quoted ids, quoted keys, identifier
+  report covering list shape, repeated fields, quoted tags, quoted IDs, quoted keys, identifier
   normalization, collisions and version spelling. The mode enforces the C.6 output guarantee.
 - Added a canonical serializer that preserves the version line the document declared and is a
   fixed point under parse/serialize.
-- Added validation for required fields, closed vocabularies, status rules, duplicate ids, ICU
+- Added validation for required fields, closed vocabularies, status rules, duplicate IDs, ICU
   brace balance, file layout, display width and style.
 - Added `@cliff-format/json` with lossless CLIFF-shaped JSON, plus flat and nested JSON for
   runtime resources. Imports report key normalization and collision repairs; flat and nested

@@ -1,0 +1,119 @@
+{
+  "name": "@cliff-format/i18n",
+  "version": "0.2.0",
+  "description": "CLIFF-native runtime localization, authoring and ICU formatting",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.12"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "browser": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./lite": {
+      "browser": {
+        "types": "./dist/lite.d.ts",
+        "default": "./dist/lite.js"
+      },
+      "import": {
+        "types": "./dist/lite.d.ts",
+        "default": "./dist/lite.js"
+      },
+      "require": {
+        "types": "./dist/lite.d.cts",
+        "default": "./dist/lite.cjs"
+      }
+    },
+    "./react": {
+      "browser": {
+        "types": "./dist/react.d.ts",
+        "default": "./dist/react.js"
+      },
+      "import": {
+        "types": "./dist/react.d.ts",
+        "default": "./dist/react.js"
+      },
+      "require": {
+        "types": "./dist/react.d.cts",
+        "default": "./dist/react.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "lite": [
+        "dist/lite.d.ts"
+      ],
+      "react": [
+        "dist/react.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@messageformat/icu-messageformat-1": "^0.13.0",
+    "messageformat": "^4.1.0"
+  },
+  "peerDependencies": {
+    "@cliff-format/core": "^0.2.0",
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@cliff-format/core": "workspace:*",
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cliff-format/cliff-js.git",
+    "directory": "packages/i18n"
+  },
+  "keywords": [
+    "cliff",
+    "i18n",
+    "l10n",
+    "localization",
+    "icu",
+    "messageformat",
+    "react"
+  ],
+  "homepage": "https://github.com/cliff-format/cliff-js#readme",
+  "bugs": {
+    "url": "https://github.com/cliff-format/cliff-js/issues"
+  }
+}

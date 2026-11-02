@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "baseUrl": "../..",
+    "paths": {
+      "@cliff-format/core": ["packages/core/src/index.ts"],
+      "@cliff-format/i18n": ["packages/i18n/src/index.ts"],
+      "@cliff-format/i18n/lite": ["packages/i18n/src/lite.ts"],
+      "@cliff-format/i18n/react": ["packages/i18n/src/react.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "test/**/*.ts", "test/**/*.tsx"]
+}

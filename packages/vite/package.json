@@ -1,0 +1,69 @@
+{
+  "name": "@cliff-format/vite",
+  "version": "0.2.0",
+  "description": "Vite plugin for importing CLIFF files and generating typed entry IDs",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.12"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@cliff-format/core": "^0.2.0",
+    "vite": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "vite": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@cliff-format/core": "workspace:*",
+    "vite": "^8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cliff-format/cliff-js.git",
+    "directory": "packages/vite"
+  },
+  "keywords": [
+    "cliff",
+    "i18n",
+    "l10n",
+    "localization",
+    "vite",
+    "vite-plugin"
+  ],
+  "homepage": "https://github.com/cliff-format/cliff-js#readme",
+  "bugs": {
+    "url": "https://github.com/cliff-format/cliff-js/issues"
+  }
+}
