@@ -4,7 +4,13 @@ import { join, resolve } from "node:path";
 
 const dryRun =
   process.argv.includes("--dry-run") || (process.env.DRY_RUN ?? "false").toLowerCase() === "true";
-const directories = ["packages/core", "packages/json"];
+const directories = [
+  "packages/core",
+  "packages/json",
+  "packages/i18n",
+  "packages/translate",
+  "packages/vite",
+];
 const npm = "npm";
 const shell = process.platform === "win32";
 
