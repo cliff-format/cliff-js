@@ -86,9 +86,10 @@ Examples:
 6. Open a release pull request from `dev` to `main` and run the full regression.
 7. Merge with a merge commit. Do not squash the release merge.
 8. On `main`, create the annotated tag `vX.Y.Z` and publish a GitHub Release whose body is the release-notes file.
-9. The release workflow verifies the tag and package versions, builds, skips versions already on npm, and publishes missing packages with npm provenance.
-10. The workflow also supports a manual dispatch. Its `dry_run` input defaults to `true`; a real manual run must be dispatched from the matching tag.
-11. For the first release, publish manually, then configure the package's GitHub Actions trusted publisher with `npm trust github`.
+9. The release workflow verifies the tag and package versions, builds, skips versions already on npm, and stages missing packages with `npm stage publish` and npm provenance.
+10. Review staged packages with `npm stage list`. Approve each stage with 2FA before it becomes public.
+11. The workflow also supports a manual dispatch. Its `dry_run` input defaults to `true`; a real manual run must be dispatched from the matching tag.
+12. For the first release, perform the bootstrap publish, then configure the package's GitHub Actions trusted publisher with `npm trust github`.
 
 The project does not use Changesets. Versions are prepared on `dev` before the release merge, matching the other CLIFF repositories.
 

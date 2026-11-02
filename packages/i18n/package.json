@@ -1,6 +1,6 @@
 {
   "name": "@cliff-format/i18n",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "CLIFF-native runtime localization, authoring and ICU formatting",
   "license": "MIT",
   "type": "module",
@@ -83,7 +83,7 @@
     "messageformat": "^4.1.0"
   },
   "peerDependencies": {
-    "@cliff-format/core": "^0.2.0",
+    "@cliff-format/core": "^0.2.1",
     "react": ">=18"
   },
   "peerDependenciesMeta": {

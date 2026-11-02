@@ -4,6 +4,15 @@ All notable changes to the CLIFF JavaScript packages are recorded here. Each ver
 features that changed behaviour, the packaging and documentation work around them, and the notes
 that matter to people building against the library.
 
+## 0.2.1 — 2026-11-02
+
+### Other Changes
+
+- Publish through npm staged publishing and validate the GitHub OIDC Trusted Publisher.
+- Add npm provenance to every published package.
+
+---
+
 ## 0.2.0 — 2026-11-02
 
 ### New Features
