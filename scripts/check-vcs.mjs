@@ -49,7 +49,9 @@ if (insideGit) {
   let log = "";
   try {
     log = base
-      ? execFileSync("git", ["log", "--format=%B%x00", `${base}..${head}`], { encoding: "utf8" })
+      ? execFileSync("git", ["log", "--no-merges", "--format=%B%x00", `${base}..${head}`], {
+          encoding: "utf8",
+        })
       : execFileSync("git", ["log", "-1", "--format=%B"], { encoding: "utf8" });
   } catch (error) {
     fail(`cannot read git history: ${error.message}`);
