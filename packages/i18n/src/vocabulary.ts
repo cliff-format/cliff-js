@@ -1,5 +1,5 @@
-import { EMOTION_TAGS, STATUS_TAGS, TYPE_TAGS } from "@cliff-format/core";
-import { EMOTION, type EmotionTag, STATUS, type StatusTag, TYPE, type TypeTag } from "./types.js";
+import { EMOTION_TAGS, STATUS_TAGS, TYPE_TAGS, VARIANT_TAGS } from "@cliff-format/core";
+import type { EmotionTag, StatusTag, TypeTag, VariantTag } from "./types.js";
 
 export function isTypeTag(value: string): value is TypeTag {
   return TYPE_TAGS.has(value);
@@ -11,6 +11,10 @@ export function isEmotionTag(value: string): value is EmotionTag {
 
 export function isStatusTag(value: string): value is StatusTag {
   return STATUS_TAGS.has(value);
+}
+
+export function isVariantTag(value: string): value is VariantTag {
+  return VARIANT_TAGS.has(value);
 }
 
 export function assertTypeTag(value: string): TypeTag {
@@ -34,4 +38,9 @@ export function assertStatusTag(value: string): StatusTag {
   return value;
 }
 
-export { EMOTION, STATUS, TYPE };
+export function assertVariantTag(value: string): VariantTag {
+  if (!isVariantTag(value)) {
+    throw new TypeError(`invalid CLIFF variant tag "${value}"`);
+  }
+  return value;
+}

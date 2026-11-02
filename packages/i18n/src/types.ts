@@ -76,6 +76,15 @@ export const STATUS = {
 
 export type StatusTag = (typeof STATUS)[keyof typeof STATUS];
 
+export const VARIANT = {
+  standard: "standard",
+  glossary: "glossary",
+} as const;
+
+export type VariantTag = (typeof VARIANT)[keyof typeof VARIANT];
+
+export const STATUS_ORDER = ["initial", "translated", "reviewed", "final"] as const;
+
 export type Params = Record<string, unknown>;
 
 export type KeyOf<Keys extends string> = string extends Keys ? string : Keys | (string & {});
@@ -96,6 +105,17 @@ export type KeyInput =
       group?: string;
       id: string;
     };
+
+export interface EntryQuery {
+  namespace?: string;
+  clan?: string;
+  group?: string;
+  locale?: string | "all";
+  status?: StatusTag | readonly StatusTag[];
+  target?: "any" | "present" | "missing";
+}
+
+export type StatusCounts = Record<StatusTag, number>;
 
 export interface ResolvedKey {
   namespace: string;
@@ -310,6 +330,10 @@ export interface I18n<Keys extends string = string> {
   has(key: KeyOf<Keys> | Exclude<KeyInput, string>, scope: TranslationScope): boolean;
   resolve(key: KeyOf<Keys> | Exclude<KeyInput, string>, scope: TranslationScope): ResolvedKey;
   keys(scope?: Partial<TranslationScope>): string[];
+  query(options?: EntryQuery): MessageRecord[];
+  untranslated(options?: Omit<EntryQuery, "status" | "target">): MessageRecord[];
+  byStatus(status: StatusTag, options?: Omit<EntryQuery, "status">): MessageRecord[];
+  statusCounts(options?: Omit<EntryQuery, "status">): StatusCounts;
   namespaces(): string[];
   clans(namespace?: string): string[];
   groups(scope?: Partial<TranslationScope>): string[];

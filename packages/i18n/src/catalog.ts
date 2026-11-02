@@ -16,10 +16,14 @@ import {
 } from "@cliff-format/core";
 import { CliffDuplicateKeyError, CliffI18nError } from "./errors.js";
 import type { KeyCatalogContext } from "./key.js";
+import { statusOf } from "./status.js";
 import type {
   CliffFile,
+  EntryQuery,
   FileOptions,
   MessageRecord,
+  StatusCounts,
+  StatusTag,
   TranslatedDraft,
   TranslationScope,
 } from "./types.js";
@@ -374,6 +378,62 @@ export class Catalog implements KeyCatalogContext {
       }
     }
     return [...keys].sort();
+  }
+
+  allRecords(): MessageRecord[] {
+    const records: MessageRecord[] = [];
+    for (const group of this.byCanonical.values()) records.push(...group);
+    return records;
+  }
+
+  query(options: EntryQuery = {}): MessageRecord[] {
+    const statuses =
+      options.status === undefined
+        ? undefined
+        : new Set<StatusTag>(Array.isArray(options.status) ? options.status : [options.status]);
+    return this.allRecords().filter((record) => {
+      if (options.namespace !== undefined && record.namespace !== options.namespace) return false;
+      if (options.clan !== undefined && record.clan !== options.clan) return false;
+      if (
+        options.group !== undefined &&
+        options.group.length > 0 &&
+        !(record.group === options.group || record.group.startsWith(`${options.group}.`))
+      ) {
+        return false;
+      }
+      if (
+        options.locale !== undefined &&
+        options.locale !== "all" &&
+        localeKey(record.locale) !== localeKey(options.locale)
+      ) {
+        return false;
+      }
+      if (statuses !== undefined && !statuses.has(statusOf(record.entry))) return false;
+      if (options.target === "present" && record.target === undefined) return false;
+      if (options.target === "missing" && record.target !== undefined) return false;
+      return true;
+    });
+  }
+
+  untranslated(options: Omit<EntryQuery, "status" | "target"> = {}): MessageRecord[] {
+    return this.query(options).filter(
+      (record) => record.target === undefined || statusOf(record.entry) === "initial",
+    );
+  }
+
+  byStatus(status: StatusTag, options: Omit<EntryQuery, "status"> = {}): MessageRecord[] {
+    return this.query({ ...options, status });
+  }
+
+  statusCounts(options: Omit<EntryQuery, "status"> = {}): StatusCounts {
+    const counts: StatusCounts = {
+      initial: 0,
+      translated: 0,
+      reviewed: 0,
+      final: 0,
+    };
+    for (const record of this.query(options)) counts[statusOf(record.entry)]++;
+    return counts;
   }
 
   locales(): string[] {

@@ -18,6 +18,7 @@ import type {
   AddResult,
   CliffFile,
   CliffResource,
+  EntryQuery,
   FileOptions,
   I18n,
   I18nDiagnostic,
@@ -29,6 +30,8 @@ import type {
   Params,
   ResolvedKey,
   ScopedI18n,
+  StatusCounts,
+  StatusTag,
   TranslationScope,
   TypeTag,
   WidthPolicy,
@@ -205,6 +208,22 @@ export class I18nImpl implements I18n<string>, I18nRuntime {
 
   keys(scope: Partial<TranslationScope> = {}): string[] {
     return this.catalog.keys(scope);
+  }
+
+  query(options: EntryQuery = {}): MessageRecord[] {
+    return this.catalog.query(options);
+  }
+
+  untranslated(options: Omit<EntryQuery, "status" | "target"> = {}): MessageRecord[] {
+    return this.catalog.untranslated(options);
+  }
+
+  byStatus(status: StatusTag, options: Omit<EntryQuery, "status"> = {}): MessageRecord[] {
+    return this.catalog.byStatus(status, options);
+  }
+
+  statusCounts(options: Omit<EntryQuery, "status"> = {}): StatusCounts {
+    return this.catalog.statusCounts(options);
   }
 
   namespaces(): string[] {

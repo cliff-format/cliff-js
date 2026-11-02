@@ -6,6 +6,7 @@ import {
   validateDocument,
 } from "@cliff-format/core";
 import { CliffI18nError, CliffMissingKeyError, CliffMissingMetadataError } from "./errors.js";
+import { reconcileEntryStatus } from "./status.js";
 import type {
   CommitOptions,
   EmotionTag,
@@ -127,9 +128,6 @@ export class MessageBuilderImpl {
   target(text: string, params: Params = {}): MessageBuilderImpl {
     this.targetText = text;
     this.targetParams = { ...this.targetParams, ...params };
-    if (this.statusTag === undefined || this.statusTag === "initial") {
-      this.statusTag = "translated";
-    }
     return this;
   }
 
@@ -479,10 +477,13 @@ export class MessageBuilderImpl {
       this.ensureAuthoringMetadata(resolved);
       this.applyOverwrite(existing);
     } else if (this.targetText !== undefined) {
+      const previous = {
+        ...(existing.entry.source === undefined ? {} : { source: existing.entry.source }),
+        ...(existing.entry.target === undefined ? {} : { target: existing.entry.target }),
+        ...(this.statusTag === undefined ? {} : { explicit: this.statusTag }),
+      };
       existing.entry.target = this.targetText;
-      if (existing.entry.status === undefined || existing.entry.status === "initial") {
-        existing.entry.status = "translated";
-      }
+      existing.entry.status = reconcileEntryStatus(existing.entry, previous);
     } else {
       this.ensureAuthoringMetadata(resolved);
     }
@@ -492,11 +493,15 @@ export class MessageBuilderImpl {
 
   private applyOverwrite(record: MessageRecord): void {
     const entry = record.entry;
+    const previous = {
+      ...(entry.source === undefined ? {} : { source: entry.source }),
+      ...(entry.target === undefined ? {} : { target: entry.target }),
+      ...(this.statusTag === undefined ? {} : { explicit: this.statusTag }),
+    };
     if (this.sourceText !== undefined) entry.source = this.sourceText;
     if (this.targetText !== undefined) entry.target = this.targetText;
     if (this.typeTag !== undefined) entry.type = this.typeTag;
     if (this.emotionTags.length > 0) entry.emotion = [...this.emotionTags];
-    if (this.statusTag !== undefined) entry.status = this.statusTag;
     if (this.contextText !== undefined) entry.context = this.contextText;
     if (this.maxWidthCells !== undefined) entry.maxWidth = this.maxWidthCells;
     if (this.referencePaths.length > 0) entry.reference = [...this.referencePaths];
@@ -504,6 +509,7 @@ export class MessageBuilderImpl {
     if (Object.keys(this.extensionMap).length > 0) {
       entry.extensions = { ...entry.extensions, ...this.extensionMap };
     }
+    entry.status = reconcileEntryStatus(entry, previous);
   }
 
   private validateDocument(record: MessageRecord): void {

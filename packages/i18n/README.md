@@ -107,6 +107,41 @@ i18n.toCliff(); // one serialized CLIFF document
 Entries whose target is missing or `status: initial` fall back to the source text. A fallback
 locale is used before the source-language record when it has a target.
 
+## Status and queries
+
+The builder reconciles status on writes without promoting through review:
+
+- adding a target to an initial entry → `translated`;
+- reworking the target of a `reviewed`/`final` entry → `translated`;
+- changing the source through `commit({ overwrite: true })` → `translated`;
+- an explicit `.status(...)` always wins;
+- a missing target means `initial`.
+
+Review and final are deliberate states: the library never promotes to `reviewed` or `final` by
+itself. The core validator still enforces that `translated`, `reviewed` and `final` require a
+target.
+
+~~~ts
+i18n.untranslated({ namespace: "demo", clan: "settings" });
+i18n.byStatus("reviewed", { namespace: "demo", clan: "settings" });
+i18n.query({ status: ["initial", "translated"], target: "present" });
+i18n.statusCounts({ namespace: "demo", clan: "settings" });
+~~~
+
+`locale` defaults to `"all"`. Pass a BCP 47 tag to restrict a query to one target language.
+
+Fixed vocabularies are exported as enum-like const objects and guards:
+
+~~~ts
+TYPE.label;             // "label"
+EMOTION.objective;      // "objective"
+STATUS.final;           // "final"
+VARIANT.glossary;       // "glossary"
+isStatusTag("final");   // true
+isVariantTag("glossary"); // true
+canTransitionStatus("reviewed", "final"); // true
+~~~
+
 ## ICU
 
 The full entry point uses:

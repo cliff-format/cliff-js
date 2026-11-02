@@ -19,6 +19,10 @@ that matter to people building against the library.
   parsed tolerantly and merged by canonical id.
 - Added `@cliff-format/vite`, which imports `.cliff` files as raw CLIFF modules, generates
   `virtual:cliff` resources and an ambient `CliffKey` union, and refreshes both on HMR.
+- Added status queries and enum-like vocabulary exports: `query()`, `untranslated()`,
+  `byStatus()`, `statusCounts()`, `STATUS`, `VARIANT`, vocabulary guards and
+  `canTransitionStatus()`. Writes now reconcile `initial`/`translated`/review invalidation
+  without requiring manual status bookkeeping.
 - Added `docs/web-localization.md` and package READMEs for the new packages.
 
 ### Other Changes

@@ -111,7 +111,40 @@ i18n.setLocale(locale) / changeLanguage(locale)
 i18n.subscribe(listener): () => void
 i18n.format(message, params?, options?) / formatToParts(...)
 i18n.validate() / diagnostics()
+i18n.query(options?) / untranslated(options?) / byStatus(status, options?)
+i18n.statusCounts(options?)
 ```
+
+### Status and query
+
+```ts
+interface EntryQuery {
+  namespace?: string;
+  clan?: string;
+  group?: string;
+  locale?: string | "all";
+  status?: StatusTag | readonly StatusTag[];
+  target?: "any" | "present" | "missing";
+}
+
+type StatusCounts = Record<StatusTag, number>;
+```
+
+Writes reconcile status automatically: a target added to an initial entry, a reworked
+reviewed/final target and a changed source all return `translated`; an explicit `.status()`
+wins; a missing target means `initial`. The library never auto-promotes to `reviewed` or
+`final`.
+
+`untranslated()` returns entries with no target or status `initial`. `byStatus()` filters a
+single status; `query()` accepts several statuses and target presence. `locale` defaults to
+`"all"`.
+
+### Fixed vocabularies
+
+`TYPE`, `EMOTION`, `STATUS` and `VARIANT` are exported as enum-like const objects with
+matching literal types. Guards `isTypeTag`, `isEmotionTag`, `isStatusTag`, `isVariantTag`
+and the transition helper `canTransitionStatus` are exported from the same entry. Core also
+exports the underlying `TYPE_TAGS`, `EMOTION_TAGS`, `STATUS_TAGS` and `VARIANT_TAGS` sets.
 
 `namespace` and `clan` are required by `TranslationScope`. There is no default scope and no
 `i18n.t` property; use `i18n.scope()` or the React hook.

@@ -99,7 +99,25 @@ entries with `status: initial` and are exported by `toCliff()`. The API enforces
 fields: `source`, an effective `type`, and `status`. `emotion` is optional by specification and
 derives from the type; `requireEmotion` can tighten that for a project.
 
-## 6. CLIFF coverage
+## 6. Status
+
+Status is a workflow field, not a rendering detail. Writes reconcile the two transitions the
+library can know without a human decision:
+
+- a target added to an initial entry, or a reworked target on a reviewed/final entry, becomes
+  `translated`;
+- a changed source becomes `translated`;
+- an explicit `.status()` wins;
+- a missing target becomes `initial`.
+
+The library never promotes to `reviewed` or `final`; those are human decisions. Core
+validation enforces the target requirement for every non-initial state.
+
+`i18n.untranslated()`, `i18n.byStatus()`, `i18n.query()` and `i18n.statusCounts()` expose the
+catalog without walking files. `TYPE`, `EMOTION`, `STATUS` and `VARIANT` are enum-like const
+objects with literal types and guards.
+
+## 7. CLIFF coverage
 
 | CLIFF feature | Runtime behaviour |
 | --- | --- |
@@ -119,7 +137,7 @@ derives from the type; `requireEmotion` can tighten that for a project.
 | display width | measured on the rendered text with core `displayWidth` |
 | resource limits | enforced by core |
 
-## 7. ICU
+## 8. ICU
 
 CLIFF stores ICU syntax verbatim. The i18n runtime does not rewrite it. The full entry point uses
 the Unicode MessageFormat implementation:
@@ -134,7 +152,7 @@ bidi-isolation parts; `formatToParts()` preserves markup for framework rendering
 The lite entry supports only simple `{name}` placeholders and reports `icu-unsupported` for
 complex messages. It is a bundle-size choice, not a silent fallback.
 
-## 8. DeepSeek
+## 9. DeepSeek
 
 `@cliff-format/translate` exchanges CLIFF only. The prompt contains the complete CLIFF document
 and optional glossary CLIFF documents; the model is instructed to return the complete file, never
@@ -148,13 +166,13 @@ setting to matter.
 The package is build/server-side by design. The browser should call a proxy; the key is never part
 of the client bundle.
 
-## 9. Vite
+## 10. Vite
 
 The Vite plugin transforms `.cliff` into a JavaScript module whose default export is the raw CLIFF
 string, and generates `virtual:cliff` resources plus an ambient `CliffKey` union. This gives
 editors autocomplete without changing the file format and keeps the runtime parsing CLIFF.
 
-## 10. Pain points addressed
+## 11. Pain points addressed
 
 | Pain | Design response |
 | --- | --- |
@@ -167,7 +185,7 @@ editors autocomplete without changing the file format and keeps the runtime pars
 | Translation corrupts structure | tolerant parse plus merge by canonical id |
 | Page text and resource files diverge | `.source()` drafts export as CLIFF |
 
-## 11. Non-goals
+## 12. Non-goals
 
 - No JSON resource format in the web path.
 - No runtime variant keyed by type/emotion; CLIFF canonical ids are unique. Use distinct ids or ICU
