@@ -1,4 +1,4 @@
-# Browser Usage
+# Browser usage
 
 `@cliff-format/core`, `@cliff-format/json`, `@cliff-format/i18n` and `@cliff-format/translate`
 are browser-safe at their root entries. They do not import Node built-ins and do not use DOM APIs

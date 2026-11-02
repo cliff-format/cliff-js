@@ -31,7 +31,7 @@ const result = await translator.translate(cliffText, {
 });
 
 console.log(result.cliff);        // complete CLIFF
-console.log(result.untranslated); // canonical ids without a target
+console.log(result.untranslated); // canonical IDs without a target
 console.log(result.usage);
 ~~~
 

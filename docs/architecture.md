@@ -46,7 +46,7 @@ JSON.
 3. `parseTolerant` applies only the Appendix C repairs, then validates. It returns a document only when the repaired output is strictly valid.
 4. `serialize` emits the version line the document declared and never rewrites identifiers.
 5. Comments, blank lines and trailing terminators are not part of the model.
-6. Extensions are preserved as raw CLIFF text and are never inherited.
+6. Extensions are preserved as raw CLIFF text and stay local to their container.
 7. JSON importers never silently overwrite a key or identifier; renames and collisions are reported.
 8. The core entry point is browser-safe: no Node built-ins, no file I/O, no evaluation of document content.
 9. The i18n runtime is a view over CLIFF documents. It never converts a document to a JSON resource.

@@ -19,7 +19,7 @@
 
 ---
 
-CLIFF keeps translation context — namespace, clan, group path, entry id, type, emotion,
+CLIFF keeps translation context — namespace, clan, group path, entry ID, type, emotion,
 width — next to every string, in a line-oriented format that stays cheap for translators and
 LLMs alike. **cliff-js** is the JavaScript and TypeScript implementation of that format: a typed
 data model, a strict parser, a tolerant parser, a canonical serializer, a validator, JSON
@@ -29,7 +29,7 @@ converters, a CLIFF-native web runtime, a DeepSeek translation client and a Vite
 | --- | --- |
 | **Parse** | Strict mode rejects exactly what the grammar rejects; tolerant mode applies the seven documented repairs of Appendix C and reports each one. |
 | **Serialize** | Canonical output that round-trips, preserving the specification version the document declared. |
-| **Validate** | Required fields, closed vocabularies, status rules, duplicate ids, ICU brace balance, layout, display width, and style. |
+| **Validate** | Required fields, closed vocabularies, status rules, duplicate IDs, ICU brace balance, layout, display width, and style. |
 | **Convert** | Lossless CLIFF-shaped JSON, plus flat and nested JSON for runtime resources. |
 | **Typed and browser-first** | ESM, CommonJS and .d.ts from one source; no runtime dependencies and no Node built-ins in the browser entry points. |
 
@@ -100,7 +100,7 @@ for (const issue of validate(text)) {
 ~~~
 
 `parse` is the strict syntax and structure parser. It does not enforce required fields,
-vocabularies, ICU balance, duplicate ids, layout or width. `validate` is the full semantic gate
+vocabularies, ICU balance, duplicate IDs, layout or width. `validate` is the full semantic gate
 and returns diagnostics instead of throwing for invalid CLIFF content.
 
 ## Strict and tolerant parsing
@@ -123,7 +123,7 @@ is the default; the mode is never chosen for you.
 | C.2.1 bare scalar in a list-typed field | `emotion: objective` | `["objective"]` |
 | C.2.2 repeated field in one scope | two `target:` lines | concatenated / appended in order |
 | C.2.3 quoted tag | `status: "final"` | `final` |
-| C.2.4 quoted entry id | `<"resolution">` | `resolution` |
+| C.2.4 quoted entry ID | `<"resolution">` | `resolution` |
 | C.2.5 identifier with a reserved character | `<Save & Load>` | `Save-Load` (+ collision handling) |
 | C.2.6 version-line spelling | `cliff 1.1.0` | `CLIFF 1.1` |
 | C.2.7 quoted key | `"context": "…"` | `context: "…"` |

@@ -12,17 +12,17 @@ validateDocument(document: CliffDocument, options?: ValidateDocumentOptions): Va
 serialize(document: CliffDocument, options?: { version?: "1.0" | "1.1" }): string
 ```
 
-`parse` throws `CliffParseError` for syntax or structural errors. It does not check required fields, vocabularies, ICU balance, duplicate IDs, layout or width.
+`parse` checks syntax and structure and throws `CliffParseError` on failure. Call `validate` for required fields, vocabularies, ICU balance, duplicate IDs, layout and width.
 
 `parseTolerant` applies the Appendix C repairs, records every correction and validates the repaired document. It throws `CliffValidationError` when hard errors remain.
 
-`validate` never throws for invalid CLIFF content; it returns issues. It accepts `tolerant`, `checkWidth`, `checkLayout`, `style` and `onIdCollision`.
+`validate` returns issues for invalid content and accepts `tolerant`, `checkWidth`, `checkLayout`, `style` and `onIdCollision`.
 
-`serialize` does not validate. It throws `CliffModelError` when a string cannot be represented.
+Call `validate` before `serialize`. `serialize` throws `CliffModelError` when a string cannot be represented.
 
 ### Model
 
-`CliffDocument` contains `specVersion`, `header`, `groups`, an optional `path` and `corrections`. `path` is non-serialized runtime metadata used for file-layout warnings; CLIFF has no `path` field. `CliffGroup.path` is the section/group path, not a field either. `CliffHeader`, `CliffGroup` and `CliffEntry` use camelCase property names; JSON interchange uses kebab-case field names.
+`CliffDocument` contains `specVersion`, `header`, `groups`, an optional `path` and `corrections`. `path` is non-serialized runtime metadata for file-layout warnings. `CliffGroup.path` stores the group path. `CliffHeader`, `CliffGroup` and `CliffEntry` use camelCase property names; JSON interchange uses kebab-case field names.
 
 Each group and entry carries a 1-based `line`. Hand-built models use `line: 0`.
 
@@ -146,8 +146,8 @@ matching literal types. Guards `isTypeTag`, `isEmotionTag`, `isStatusTag`, `isVa
 and the transition helper `canTransitionStatus` are exported from the same entry. Core also
 exports the underlying `TYPE_TAGS`, `EMOTION_TAGS`, `STATUS_TAGS` and `VARIANT_TAGS` sets.
 
-`namespace` and `clan` are required by `TranslationScope`. There is no default scope and no
-`i18n.t` property; use `i18n.scope()` or the React hook.
+`namespace` and `clan` are required by `TranslationScope`. Pass both to every scope; get `t` from
+`i18n.scope()` or the React hook.
 
 The full entry uses `messageformat` for MF2 and `@messageformat/icu-messageformat-1` for MF1.
 `@cliff-format/i18n/lite` excludes those dependencies. `@cliff-format/i18n/react` exports
@@ -202,7 +202,7 @@ Defaults: `baseUrl: "https://api.deepseek.com"`, `model: "deepseek-flash"`,
 `maxTokens: 8192`, `timeoutMs: 180000`, `maxRetries: 2`.
 
 The prompt contains CLIFF only. Responses are parsed with `parseTolerant`, validated, and merged by
-canonical id; only `target` and `status` are copied. `reviewed`/`final` entries are preserved
+canonical ID; only `target` and `status` are copied. `reviewed`/`final` entries are preserved
 unless `overwrite: "all"`. See the [translate package README](../packages/translate/README.md).
 
 ## @cliff-format/vite

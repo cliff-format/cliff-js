@@ -47,11 +47,11 @@ First public release.
   case-sensitive and never rewritten, tags stay in their closed vocabularies, terminators are
   accepted but never re-emitted, layout stays a warning, and resource limits are enforced.
 - Added tolerant parsing with the seven relaxations of specification Appendix C, and a per-repair
-  report covering list shape, repeated fields, quoted tags, quoted ids, quoted keys, identifier
+  report covering list shape, repeated fields, quoted tags, quoted IDs, quoted keys, identifier
   normalization, collisions and version spelling. The mode enforces the C.6 output guarantee.
 - Added a canonical serializer that preserves the version line the document declared and is a
   fixed point under parse/serialize.
-- Added validation for required fields, closed vocabularies, status rules, duplicate ids, ICU
+- Added validation for required fields, closed vocabularies, status rules, duplicate IDs, ICU
   brace balance, file layout, display width and style.
 - Added `@cliff-format/json` with lossless CLIFF-shaped JSON, plus flat and nested JSON for
   runtime resources. Imports report key normalization and collision repairs; flat and nested

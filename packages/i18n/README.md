@@ -42,18 +42,16 @@ does not hide defaults:
 i18n.scope({ namespace: "demo" });
 ~~~
 
-## Entries, not key-value pairs
+## Entry IDs
 
-CLIFF is a document of groups and entries, not a flat key-value map. An entry is an `<id>` marker
-plus fields such as `source`, `target`, `type` and `status`. The canonical ID is
-`namespace.clan.group-path.entry-id`.
+An entry starts with `<id>` and contains fields such as `source`, `target`, `type` and
+`status`. Its canonical ID is `namespace.clan.group-path.entry-id`.
 
-The argument to `t("...")` is a runtime lookup key. It resolves to that entry ID, or to a scoped
-short form of it. `key: value` in a CLIFF file is field syntax; it is not the format's data model.
+Pass a canonical ID, a scoped short form, or an entry ID object to `t()` or `i18n.resolve()`.
 
 ## Entry ID syntax
 
-Every input form resolves to a CLIFF canonical ID. None of them is a fuzzy match.
+The resolver accepts these forms:
 
 | Form | Example |
 | --- | --- |
@@ -67,7 +65,7 @@ Every input form resolves to a CLIFF canonical ID. None of them is a fuzzy match
 If an entry ID is ambiguous, the default `strictEntryIds: true` throws `CliffAmbiguousEntryError`. Set it
 to `false` only when a deterministic diagnostic-assisted choice is acceptable.
 
-Aliases are explicit:
+Define aliases explicitly:
 
 ~~~ts
 createI18n({
@@ -93,9 +91,9 @@ t("contrast").source("Contrast").typeFromGroup().render();
 t("contrast").source("Contrast").render();
 ~~~
 
-A draft is created on `render()` or `commit()`, not when the builder is created. The draft is a
-real CLIFF entry with `status: initial`; `i18n.toCliff()` exports it. Lookup mode does not need
-`source()` or `type()`:
+A draft is created on `render()` or `commit()`, not when the builder is created. It is a CLIFF
+entry with `status: initial`; `i18n.toCliff()` exports it. Lookup needs neither `source()` nor
+`type()`:
 
 ~~~ts
 t("resolution").render();
@@ -111,7 +109,7 @@ i18n.files();  // [{ filePath, namespace, clan, locale, text, document }]
 i18n.toCliff(); // one serialized CLIFF document
 ~~~
 
-`filePath` and `sourcePath` are runtime/build metadata. They are never written into CLIFF.
+`filePath` and `sourcePath` are runtime/build metadata; the serializer does not write them.
 
 Entries whose target is missing or `status: initial` fall back to the source text. A fallback
 locale is used before the source-language record when it has a target.

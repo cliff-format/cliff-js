@@ -25,13 +25,9 @@ export interface StatusContext {
 }
 
 /**
- * Resolve the status a write should leave on an entry.
- *
- * The specification's workflow is initial -> translated -> reviewed -> final,
- * with every state able to return to translated when the source changes or the
- * target is reworked. An explicit status always wins; otherwise a missing
- * target means initial, and a changed source or reworked reviewed/final target
- * invalidates the previous review.
+ * Return the status a write should leave on an entry.
+ * An explicit status wins. Otherwise a missing target is initial, and a changed
+ * source or reworked reviewed/final target returns to translated.
  */
 export function reconcileEntryStatus(entry: CliffEntry, previous: StatusContext = {}): StatusTag {
   if (previous.explicit !== undefined) return previous.explicit;

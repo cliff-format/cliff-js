@@ -1,44 +1,30 @@
-# Web Localization With CLIFF
+# Web localization with CLIFF
 
-This document defines the web localization layer built on top of `@cliff-format/core`. It explains
-why the API looks the way it does, how entry IDs are resolved, and which CLIFF guarantees the runtime
-preserves. It is the design record for `@cliff-format/i18n`, `@cliff-format/translate` and
-`@cliff-format/vite`.
+`@cliff-format/i18n` reads CLIFF documents, resolves entry IDs, and renders ICU messages.
+`@cliff-format/vite` supplies the documents; `@cliff-format/translate` writes targets.
 
-## 0. Terms
+## Entry IDs
 
-CLIFF is **not a key-value catalog**. A CLIFF document is a header, a set of group sections, and a
-set of entries:
+A CLIFF document contains a header, group sections, and entries. An entry starts with `<id>` and
+contains fields. Its canonical ID is `namespace.clan.group-path.entry-id`.
 
-- an **entry** is the translation unit: an `<id>` marker followed by fields;
-- the **entry ID** is not a field; the marker names the entry;
-- the **canonical ID** is `namespace.clan.group-path.entry-id`;
-- a **field** is a `key: value` line inside the header, a group, or an entry. `key: value` is
-  field syntax, not the document's data model.
+Pass a canonical ID, a scoped short form, or an entry ID object to `t()` or `i18n.resolve()`.
 
-The argument to `t("...")` is a runtime lookup key. It resolves to a canonical entry ID or a
-scoped short form of one; it is not a JSON property and not a CLIFF field name.
+## Runtime model
 
-## 1. One working format
-
-CLIFF is the working format for extraction, translation, review, delivery and runtime. The web
-packages read and write CLIFF directly:
+The web packages read and write CLIFF directly:
 
 ```text
 CLIFF text ── parse ──> CliffDocument ── index ──> t()/ICU ──> string | parts
      ^                       |
      |                       └── serialize ──> CLIFF text
-     └── DeepSeek response parsed as CLIFF, merged by canonical id
+     └── DeepSeek response parsed as CLIFF, merged by canonical ID
 ```
 
-There is no JSON resource layer. `@cliff-format/json` remains an interoperability package; the web
-runtime does not use it.
+The runtime parses CLIFF into an index, renders messages, and serializes edits back to CLIFF.
+`@cliff-format/json` is for interoperability; the web runtime does not require it.
 
-CLIFF section 2.1 says the format is not a runtime engine format. The i18n package is therefore a
-**runtime view over CLIFF documents**, not a new format: it parses CLIFF into an in-memory index,
-renders it, and serializes edits back to canonical CLIFF.
-
-## 2. Packages
+## Packages
 
 | Package | Responsibility |
 | --- | --- |
@@ -51,24 +37,21 @@ renders it, and serializes edits back to canonical CLIFF.
 `@cliff-format/i18n` depends on `@cliff-format/core` (peer), `messageformat` and
 `@messageformat/icu-messageformat-1`. React is an optional peer used only by the react subpath.
 
-## 3. Scope is mandatory
+## Scope
 
-Every CLIFF document requires `namespace` and `clan`, and every canonical id starts with them.
-The runtime therefore never invents defaults:
+Every CLIFF document requires `namespace` and `clan`. Pass both to the scope:
 
 ```ts
 const { t } = i18n.scope({ namespace: "demo", clan: "settings", group: "video" });
 ```
 
-The scope type requires both strings. A full entry ID must agree with the scope; a mismatch is a
-`CliffScopeMismatchError` rather than a silent cross-clan lookup.
+A full entry ID must match the scope. A mismatch throws `CliffScopeMismatchError`.
 
-`createI18n()` is a resource store, not a translator. It has no `t` property. `t` comes from
-`i18n.scope()` or, in React, from `useTranslation()`.
+Get `t` from `i18n.scope()` or `useTranslation()`. `createI18n()` has no `t` property.
 
-## 4. Entry ID syntax
+## Entry ID syntax
 
-All of these are first-class inputs and normalize to the same canonical entry ID:
+The resolver accepts these forms:
 
 | Form | Example with scope `demo`/`settings`/group `video` |
 | --- | --- |
@@ -77,18 +60,15 @@ All of these are first-class inputs and normalize to the same canonical entry ID
 | Friendly path | `demo/settings/video/resolution` |
 | Scope clan | `settings.video.resolution` |
 | Scope group | `video.resolution` |
-| Unique id | `resolution` |
+| Unique entry ID | `resolution` |
 
-Notes:
-
-- A **name** is `A-Z a-z 0-9 _ -`; a dot is a separator, never part of a name. There is no `path`
-  field in CLIFF. The `[video.advanced]` line is the **group path**, and the JS model property
-  `CliffGroup.path` is its in-memory representation.
-- Resolution checks aliases, exact canonical ids, scope-prefix candidates, then unique suffix
+- A **name** uses `A-Z a-z 0-9 _ -`; a dot separates names. The `[video.advanced]` line is
+  the **group path**; `CliffGroup.path` stores it in memory.
+- Resolution checks aliases, exact canonical IDs, scope-prefix candidates, then unique suffix
   matches. `strictEntryIds: true` is the default; ambiguity throws with every candidate.
-- No case folding or separator rewriting. Changing an entry ID is changing a translation match.
+- Matching is case-sensitive and does not rewrite separators.
 
-## 5. Builder state machine
+## Builder state machine
 
 `t("home.title")` returns `MessageBuilder<{ source: false; type: false }>`. Calling `.source()` enters
 authoring mode; `render()` and `commit()` are `never` until a type is available.
@@ -101,37 +81,35 @@ t("contrast").source("Contrast").typeFromGroup().render();       // B: explicit 
 t("contrast").source("Contrast").render();
 ```
 
-A is the default. B is an explicit assertion: the runtime resolves the group and throws
-`CliffMissingMetadataError` if the group has no `type`. Lookup mode does not require either step:
+Use `.type()` for an explicit type. Use `.typeFromGroup()` to inherit the group type; it throws
+`CliffMissingMetadataError` when the group has none. Lookup needs neither.
 
 ```ts
 t("resolution").render(); // reads source/type/status from CLIFF
 ```
 
-Drafts are created on `render()`/`commit()`, not on builder construction. They are real CLIFF
-entries with `status: initial` and are exported by `toCliff()`. The API enforces the CLIFF-required
-fields: `source`, an effective `type`, and `status`. `emotion` is optional by specification and
-derives from the type; `requireEmotion` can tighten that for a project.
+`render()` and `commit()` create a draft. The draft is a CLIFF entry with `status: initial`;
+`toCliff()` exports it. The API requires `source`, an effective `type`, and `status`. `emotion` is
+optional by specification and derives from the type; `requireEmotion` can tighten that for a project.
 
-## 6. Status
+## Status
 
-Status is a workflow field, not a rendering detail. Writes reconcile the two transitions the
-library can know without a human decision:
+Status records workflow state. Writes apply the transitions the library can determine:
 
-- a target added to an initial entry, or a reworked target on a reviewed/final entry, becomes
-  `translated`;
-- a changed source becomes `translated`;
-- an explicit `.status()` wins;
-- a missing target becomes `initial`.
+- A target added to an initial entry, or a reworked target on a reviewed/final entry, becomes
+  `translated`.
+- A changed source becomes `translated`.
+- An explicit `.status()` call wins.
+- A missing target becomes `initial`.
 
-The library never promotes to `reviewed` or `final`; those are human decisions. Core
-validation enforces the target requirement for every non-initial state.
+Only a human review sets `reviewed` or `final`. Core validation requires a target for every
+non-initial state.
 
 `i18n.untranslated()`, `i18n.byStatus()`, `i18n.query()` and `i18n.statusCounts()` expose the
 catalog without walking files. `TYPE`, `EMOTION`, `STATUS` and `VARIANT` are enum-like const
 objects with literal types and guards.
 
-## 7. CLIFF coverage
+## CLIFF coverage
 
 | CLIFF feature | Runtime behaviour |
 | --- | --- |
@@ -142,8 +120,8 @@ objects with literal types and guards.
 | entry source/target/status | lookup, draft, fallback and status rules |
 | type/emotion | metadata, defaults, expectation diagnostics, translation prompt |
 | context/max-width/reference/reviewer | preserved and checked or passed through |
-| `x-` extensions | preserved, never inherited |
-| canonical ids and uniqueness | catalog index; duplicates rejected |
+| `x-` extensions | preserved; stay local to their container |
+| canonical IDs and uniqueness | catalog index; duplicates rejected |
 | 1.0 / 1.1 | parsed by core; declared version preserved |
 | tolerant parsing | opt-in on `add()`; corrections reported |
 | glossary variant | indexed like any CLIFF document and usable as reference |
@@ -151,10 +129,9 @@ objects with literal types and guards.
 | display width | measured on the rendered text with core `displayWidth` |
 | resource limits | enforced by core |
 
-## 8. ICU
+## ICU
 
-CLIFF stores ICU syntax verbatim. The i18n runtime does not rewrite it. The full entry point uses
-the Unicode MessageFormat implementation:
+The runtime renders ICU syntax in place with the Unicode MessageFormat implementation:
 
 - `messageformat@4` formats MessageFormat 2 (LDML 48), including `formatToParts`.
 - `@messageformat/icu-messageformat-1` compiles MF1 into the same formatter.
@@ -163,46 +140,32 @@ Detection follows CLIFF section 14, with an MF1 precedence check so a plural mes
 `}}` is not mistaken for MF2. `format()` joins literal and expression parts and drops invisible
 bidi-isolation parts; `formatToParts()` preserves markup for framework rendering.
 
-The lite entry supports only simple `{name}` placeholders and reports `icu-unsupported` for
-complex messages. It is a bundle-size choice, not a silent fallback.
+The lite entry supports simple `{name}` placeholders and reports `icu-unsupported` for complex
+messages. Use it to reduce bundle size.
 
-## 9. DeepSeek
+## DeepSeek
 
-`@cliff-format/translate` exchanges CLIFF only. The prompt contains the complete CLIFF document
-and optional glossary CLIFF documents; the model is instructed to return the complete file, never
-JSON. Responses are stripped of fences, parsed with `parseTolerant`, validated, and merged by
-canonical id. Only `target` and `status` are copied.
+`@cliff-format/translate` sends and receives CLIFF. The prompt contains the complete CLIFF
+document and optional glossary documents; the model returns the complete file. Responses are
+stripped of fences, parsed with `parseTolerant`, validated, and merged by canonical ID. Only
+`target` and `status` are copied.
 
-Defaults are `deepseek-flash`, `temperature: 1.3`, and `thinking: { type: "disabled" }`. Thinking
-mode is on by default at the API and ignores temperature, so disabling it is required for the 1.3
-setting to matter.
+Defaults are `deepseek-flash`, `temperature: 1.3`, and `thinking: { type: "disabled" }`. Set
+thinking to `"off"`: the API enables it by default and ignores temperature while it is on.
 
-The package is build/server-side by design. The browser should call a proxy; the API key is never
-part of the client bundle.
+Run this package on the server or at build time. In the browser, call a proxy; keep the API key
+out of the client bundle.
 
-## 10. Vite
+## Vite
 
 The Vite plugin transforms `.cliff` into a JavaScript module whose default export is the raw CLIFF
-string, and generates `virtual:cliff` resources plus an ambient `CliffCanonicalId` union. This gives
-editors autocomplete without changing the file format and keeps the runtime parsing CLIFF.
+string, and generates `virtual:cliff` resources plus an ambient `CliffCanonicalId` union. Editors
+autocomplete entry IDs; the runtime still parses CLIFF.
 
-## 11. Pain points addressed
-
-| Pain | Design response |
-| --- | --- |
-| Opaque entry ID strings | canonical IDs, scope, aliases and generated entry ID unions |
-| Metadata outside the string | CLIFF type/emotion/context/max-width travel with the entry |
-| JSON resource drift | CLIFF in, CLIFF out, no intermediate format |
-| Silent missing entries | diagnostics and explicit missing-entry policies |
-| Hand-written ICU | official MF1/MF2 runtime and structured parts |
-| Locale switching and SSR | per-instance state, `subscribe`, `useSyncExternalStore` |
-| Translation corrupts structure | tolerant parse plus merge by canonical entry ID |
-| Page text and resource files diverge | `.source()` drafts export as CLIFF |
-
-## 12. Non-goals
+## Non-goals
 
 - No JSON resource format in the web path.
-- No runtime variant keyed by type/emotion; CLIFF canonical ids are unique. Use distinct ids or ICU
-  `select` for behavioural variants.
+- No runtime variant selected by type or emotion; CLIFF canonical IDs are unique. Use distinct IDs
+  or ICU `select` for behavioural variants.
 - No automatic dependency fetching; resources are explicit.
 - No HTML evaluation; markup is returned as structured parts.

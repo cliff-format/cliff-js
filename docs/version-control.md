@@ -1,8 +1,8 @@
-# Version Control Policy
+# Version control policy
 
-This document defines the English-only version control policy for the CLIFF JavaScript packages. It follows the conventions used by the other CLIFF repositories: English Conventional Commits, a protected `main` release branch, a protected `dev` integration branch, annotated repository tags and an English changelog.
+This policy covers the CLIFF JavaScript packages. Use English Conventional Commits, protected `main` and `dev` branches, annotated tags and an English changelog.
 
-## 1. Scope
+## Scope
 
 This policy applies to:
 
@@ -14,9 +14,9 @@ This policy applies to:
 
 All version control artifacts are written in English. They must not contain Chinese, Japanese, Korean or other CJK text. Code, code comments and documentation may be translated separately.
 
-The project uses Git and GitHub. It does not use Diversion or Chinese commit types.
+Use Git and GitHub.
 
-## 2. Commits
+## Commits
 
 Format:
 
@@ -47,7 +47,7 @@ Examples:
 [AI] build(release): prepare v0.1.0
 ```
 
-## 3. Branches and pull requests
+## Branches and pull requests
 
 - `main` is the release branch. It is protected, always releaseable, and receives merges only from `dev`.
 - `dev` is the integration branch. It is protected, always buildable, and receives work through pull requests.
@@ -64,7 +64,7 @@ Examples:
 - Delete a work branch after merge.
 - `main` and `dev` prohibit direct pushes. A pull request must pass CI and the VCS checks before merge.
 
-## 4. Versions and tags
+## Versions and tags
 
 - Versions follow Semantic Versioning 2.0.0.
 - All published `@cliff-format/*` packages share one fixed version number. The root `package.json` version is the source of truth.
@@ -76,7 +76,7 @@ Examples:
 - Do not use build metadata in published npm versions. Put the commit SHA in the release notes instead.
 - Pre-release versions use `v0.1.0-alpha.1` style tags and the npm dist-tag `next`. Stable releases use `latest`.
 
-## 5. Release process
+## Release process
 
 1. Ensure `dev` is stable and all checks pass.
 2. On `dev`, set the root package version and every published package version to `X.Y.Z`.
@@ -92,7 +92,7 @@ Examples:
 
 The project does not use Changesets. Versions are prepared on `dev` before the release merge, matching the other CLIFF repositories.
 
-## 6. Changelog
+## Changelog
 
 `CHANGELOG.md` is English and uses this shape:
 
@@ -120,14 +120,14 @@ All notable changes to the CLIFF JavaScript packages are recorded here.
 - ...
 ```
 
-## 7. Enforcement
+## Enforcement
 
 - `scripts/check-vcs.mjs` validates commit format, English text, `main`/`dev`/work branch names, pull request titles, tag messages and `CHANGELOG.md`.
 - `scripts/check-versions.mjs` validates the fixed version group and the internal peer range.
 - CI runs on `main`, `dev` and pull requests; branch protection requires the checks.
 - The release workflow checks that `vX.Y.Z` matches every published package version and that the tag is on `main`.
 
-## 8. References
+## References
 
 - [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
 - [Semantic Versioning 2.0.0](https://semver.org/)
