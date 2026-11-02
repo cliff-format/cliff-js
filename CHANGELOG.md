@@ -36,6 +36,8 @@ that matter to people building against the library.
   new packages.
 - Updated the root README, architecture, API, browser and conformance documentation.
 
+---
+
 ## 0.1.0 — 2026-10-22
 
 First public release.
