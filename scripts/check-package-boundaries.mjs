@@ -13,38 +13,40 @@ function walk(path) {
   return output;
 }
 
-const core = JSON.parse(readFileSync("packages/core/package.json", "utf8"));
-if (Object.keys(core.dependencies ?? {}).length > 0) {
-  failures.push("@cliff-format/core must not have runtime dependencies");
-}
-for (const file of walk("packages/core/src")) {
-  const text = readFileSync(file, "utf8");
-  if (/from\s+["']node:|import\(["']node:/.test(text)) {
-    failures.push(`${file}: imports a Node builtin`);
-  }
-  if (/from\s+["']@cliff-format\//.test(text)) {
-    failures.push(`${file}: core must not import another workspace package`);
-  }
-}
+const policies = {
+  core: { runtimeDeps: false, peerCore: false, allowNode: false, workspace: [] },
+  json: { runtimeDeps: false, peerCore: true, allowNode: false, workspace: ["@cliff-format/core"] },
+  i18n: { runtimeDeps: true, peerCore: true, allowNode: false, workspace: ["@cliff-format/core"] },
+  translate: {
+    runtimeDeps: false,
+    peerCore: true,
+    allowNode: false,
+    workspace: ["@cliff-format/core"],
+  },
+  vite: { runtimeDeps: false, peerCore: true, allowNode: true, workspace: ["@cliff-format/core"] },
+};
 
-const json = JSON.parse(readFileSync("packages/json/package.json", "utf8"));
-if (Object.keys(json.dependencies ?? {}).length > 0) {
-  failures.push("@cliff-format/json must not have runtime dependencies");
-}
-if (json.peerDependencies?.["@cliff-format/core"] === undefined) {
-  failures.push("@cliff-format/json must peer-depend on @cliff-format/core");
-}
-for (const file of walk("packages/json/src")) {
-  const text = readFileSync(file, "utf8");
-  if (/from\s+["']node:|import\(["']node:/.test(text)) {
-    failures.push(`${file}: imports a Node builtin`);
+for (const [directory, policy] of Object.entries(policies)) {
+  const packageRoot = join("packages", directory);
+  const manifest = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8"));
+  if (!policy.runtimeDeps && Object.keys(manifest.dependencies ?? {}).length > 0) {
+    failures.push(manifest.name + " must not have runtime dependencies");
   }
-  const workspaceImports = [...text.matchAll(/from\s+["'](@cliff-format\/[^"']+)["']/g)].map(
-    (match) => match[1],
-  );
-  for (const specifier of workspaceImports) {
-    if (specifier !== "@cliff-format/core") {
-      failures.push(`${file}: unexpected workspace import '${specifier}'`);
+  if (policy.peerCore && manifest.peerDependencies?.["@cliff-format/core"] === undefined) {
+    failures.push(manifest.name + " must peer-depend on @cliff-format/core");
+  }
+  for (const file of walk(join(packageRoot, "src"))) {
+    const text = readFileSync(file, "utf8");
+    if (!policy.allowNode && /from\s+["']node:|import\(["']node:/.test(text)) {
+      failures.push(file + ": imports a Node builtin");
+    }
+    const workspaceImports = [...text.matchAll(/from\s+["'](@cliff-format\/[^"']+)["']/g)].map(
+      (match) => match[1],
+    );
+    for (const specifier of workspaceImports) {
+      if (!policy.workspace.includes(specifier)) {
+        failures.push(file + ": unexpected workspace import '" + specifier + "'");
+      }
     }
   }
 }

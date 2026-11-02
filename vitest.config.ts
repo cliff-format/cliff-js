@@ -3,13 +3,36 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   resolve: {
-    alias: {
-      "@cliff-format/core": fileURLToPath(new URL("./packages/core/src/index.ts", import.meta.url)),
-    },
+    alias: [
+      {
+        find: /^@cliff-format\/core$/,
+        replacement: fileURLToPath(new URL("./packages/core/src/index.ts", import.meta.url)),
+      },
+      {
+        find: /^@cliff-format\/i18n$/,
+        replacement: fileURLToPath(new URL("./packages/i18n/src/index.ts", import.meta.url)),
+      },
+      {
+        find: /^@cliff-format\/i18n\/lite$/,
+        replacement: fileURLToPath(new URL("./packages/i18n/src/lite.ts", import.meta.url)),
+      },
+      {
+        find: /^@cliff-format\/i18n\/react$/,
+        replacement: fileURLToPath(new URL("./packages/i18n/src/react.ts", import.meta.url)),
+      },
+      {
+        find: /^@cliff-format\/translate$/,
+        replacement: fileURLToPath(new URL("./packages/translate/src/index.ts", import.meta.url)),
+      },
+      {
+        find: /^@cliff-format\/vite$/,
+        replacement: fileURLToPath(new URL("./packages/vite/src/index.ts", import.meta.url)),
+      },
+    ],
   },
   test: {
     environment: "node",
-    include: ["packages/**/test/**/*.test.ts"],
+    include: ["packages/**/test/**/*.test.ts", "packages/**/test/**/*.test.tsx"],
     coverage: {
       provider: "v8",
       include: ["packages/*/src/**/*.ts"],

@@ -61,7 +61,7 @@ Export options:
 
 Flat and nested JSON are lossy: they do not carry header prose, context, types, emotion, status, width, reviewer, extensions or references. Use CLIFF-shaped JSON when those matter.
 
-i18next plural, context and namespace semantics are not implemented; those belong to the future `@cliff-format/i18n` package.
+This package only converts resources. For runtime rendering, use `@cliff-format/i18n`; it resolves CLIFF entry IDs and ICU messages instead of i18next key conventions.
 
 ## License
 
